@@ -28,15 +28,6 @@ struct Texture
 	std::string filepath;
 };
 
-struct Program
-{
-	GLuint             handle;
-	std::string        filepath;
-	std::string        programName;
-	u64                lastWriteTimestamp; // What is this for?
-	VertexBufferLayout vertexInputLayout;
-};
-
 enum Mode
 {
 	Mode_TexturedQuad,
@@ -116,6 +107,14 @@ struct Material
 	u32			bumpTextureIdx;
 };
 
+struct Program
+{
+	GLuint             handle;
+	std::string        filepath;
+	std::string        programName;
+	u64                lastWriteTimestamp; // What is this for?
+	VertexBufferLayout vertexInputLayout;
+};
 
 struct App
 {

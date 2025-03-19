@@ -218,14 +218,13 @@ void Init(App* app)
 	vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3*sizeof(float) });	// tex coordinates
 	vertexBufferLayout.stride = 5 * sizeof(float);
 
-	Mesh mesh;
-
-
-	Submesh submesh = {};
-	submesh.vertexBufferLayout = vertexBufferLayout;
-	submesh.vertices.swap(vertices);
-	submesh.indices.swap(indexes);
-	mesh.submeshes.push_back(submesh);
+	//Mesh mesh;
+	//
+	//Submesh submesh = {};
+	//submesh.vertexBufferLayout = vertexBufferLayout;
+	//submesh.vertices.swap(vertices);
+	//submesh.indices.swap(indexes);
+	//mesh.submeshes.push_back(submesh);
 
 	// geometry
 	glGenBuffers(1, &app->embeddedVertices);
