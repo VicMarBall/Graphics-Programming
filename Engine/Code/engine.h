@@ -16,162 +16,87 @@ typedef glm::ivec4 ivec4;
 
 struct Image
 {
-	void* pixels;
-	ivec2 size;
-	i32   nchannels;
-	i32   stride;
+    void* pixels;
+    ivec2 size;
+    i32   nchannels;
+    i32   stride;
 };
 
 struct Texture
 {
-	GLuint      handle;
-	std::string filepath;
+    GLuint      handle;
+    std::string filepath;
 };
 
 struct Program
 {
-	GLuint             handle;
-	std::string        filepath;
-	std::string        programName;
-	u64                lastWriteTimestamp; // What is this for?
-	VertexBufferLayout vertexInputLayout;
+    GLuint             handle;
+    std::string        filepath;
+    std::string        programName;
+    u64                lastWriteTimestamp; // What is this for?
 };
 
 enum Mode
 {
-	Mode_TexturedQuad,
-	Mode_Count
+    Mode_TexturedQuad,
+    Mode_Count
 };
 
 struct VertexV3V2 
 {
-	glm::vec3 pos;
-	glm::vec2 uv;
+    glm::vec3 pos;
+    glm::vec2 uv;
 };
-
-struct VertexBufferAttribute
-{
-	u8 location;
-	u8 componentCount;
-	u8 offset;
-};
-
-struct VertexBufferLayout 
-{
-	std::vector<VertexBufferAttribute>  attributes;
-	u8                                  stride;
-};
-
-struct VAO 
-{
-	GLuint handle;
-	GLuint programHandle;
-};
-
-struct VertexShaderAttribute
-{
-	u8 location;
-	u8 componentCount;
-};
-
-struct VertexShaderLayout
-{
-	std::vector<VertexShaderAttribute> attributes;
-};
-
-struct Submesh
-{
-	VertexBufferLayout  vertexBufferLayout;
-	std::vector<float>  vertices;
-	std::vector<u32>    indices;
-	u32                 vertexOffset;
-	u32                 indexOffset;
-
-	std::vector<VAO>    vaos;
-};
-
-struct Mesh
-{
-	std::vector<Submesh>    submeshes;
-	GLuint                  vertexBufferHandle;
-	GLuint					indexBufferHandle;
-};
-
-struct Model
-{
-	u32				 meshIdx;
-	std::vector<u32> materialIdx;
-};
-
-struct Material
-{
-	std::string name;
-	vec3		albedo;
-	vec3		emissive;
-	f32			smoothness;
-	u32			albedoTextureIdx;
-	u32			emissiveTextureIdx;
-	u32			specularTextureIdx;
-	u32			normalsTextureIdx;
-	u32			bumpTextureIdx;
-};
-
 
 struct App
 {
-	// Loop
-	f32  deltaTime;
-	bool isRunning;
+    // Loop
+    f32  deltaTime;
+    bool isRunning;
 
-	// Input
-	Input input;
+    // Input
+    Input input;
 
-	// Graphics
-	char gpuName[64];
-	char openGlVersion[64];
+    // Graphics
+    char gpuName[64];
+    char openGlVersion[64];
 
-	ivec2 displaySize;
+    ivec2 displaySize;
 
-	// program indices
-	u32 texturedGeometryProgramIdx;
-	u32 texturedMeshProgramIdx;
-	
-	// texture indices
-	u32 diceTexIdx;
-	u32 whiteTexIdx;
-	u32 blackTexIdx;
-	u32 normalTexIdx;
-	u32 magentaTexIdx;
+    std::vector<Texture>  textures;
+    std::vector<Program>  programs;
 
-	// Mode
-	Mode mode;
+    // program indices
+    u32 texturedGeometryProgramIdx;
+    
+    // texture indices
+    u32 diceTexIdx;
+    u32 whiteTexIdx;
+    u32 blackTexIdx;
+    u32 normalTexIdx;
+    u32 magentaTexIdx;
 
-	// Embedded geometry (in-editor simple meshes such as
-	// a screen filling quad, a cube, a sphere...)
-	GLuint embeddedVertices;
-	GLuint embeddedElements;
+    // Mode
+    Mode mode;
 
-	// Location of the texture uniform in the textured quad shader
-	GLuint programUniformTexture;
+    // Embedded geometry (in-editor simple meshes such as
+    // a screen filling quad, a cube, a sphere...)
+    GLuint embeddedVertices;
+    GLuint embeddedElements;
 
-	// VAO object to link our screen filling quad with our textured quad shader
-	GLuint vao;
+    // Location of the texture uniform in the textured quad shader
+    GLuint programUniformTexture;
 
-	// info about OpenGL
-	const unsigned char* glVersion;
-	const unsigned char* glRenderer;
-	const unsigned char* glVendor;
-	const unsigned char* glShadingLanguageVersion;
-	int glNumExtensions;
-	const unsigned char* glExtensions;
+    // VAO object to link our screen filling quad with our textured quad shader
+    GLuint vao;
 
-	// resources
-	std::vector<Texture>  textures;
-	std::vector<Material> materials;
-	std::vector<Mesh>     meshes;
-	std::vector<Model>    models;
-	std::vector<Program>  programs;
-
+    // info about OpenGL
+    const unsigned char* glVersion;
+    const unsigned char* glRenderer;
+    const unsigned char* glVendor;
+    const unsigned char* glShadingLanguageVersion;
+    int glNumExtensions;
+    const unsigned char* glExtensions;
 
 };
 
@@ -183,4 +108,3 @@ void Update(App* app);
 
 void Render(App* app);
 
-u32 LoadTexture2D(App* app, const char* filepath);

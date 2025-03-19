@@ -213,20 +213,6 @@ void Init(App* app)
 		0, 2, 3
 	};
 
-	VertexBufferLayout vertexBufferLayout = {};
-	vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0});					// 3D positions
-	vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3*sizeof(float) });	// tex coordinates
-	vertexBufferLayout.stride = 5 * sizeof(float);
-
-	Mesh mesh;
-
-
-	Submesh submesh = {};
-	submesh.vertexBufferLayout = vertexBufferLayout;
-	submesh.vertices.swap(vertices);
-	submesh.indices.swap(indexes);
-	mesh.submeshes.push_back(submesh);
-
 	// geometry
 	glGenBuffers(1, &app->embeddedVertices);
 	glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
@@ -252,11 +238,6 @@ void Init(App* app)
 	app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
 	Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
 	app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
-
-	app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
-	Program& texturedMeshProgram = app->programs[app->texturedGeometryProgramIdx];
-	texturedMeshProgram.vertexInputLayout = vertexBufferLayout;
-
 
 	app->diceTexIdx = LoadTexture2D(app, "dice.png");
 	app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
