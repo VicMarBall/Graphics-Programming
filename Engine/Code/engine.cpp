@@ -332,10 +332,10 @@ void Init(App* app)
 		glGetActiveAttrib(texturedMeshProgram.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
 
 		if (attributeType == GL_FLOAT_VEC2) {
-			attributeByteSize = sizeof(GLfloat) * 2;
+			attributeSize = 2;
 		}
 		if (attributeType == GL_FLOAT_VEC3) {
-			attributeByteSize = sizeof(GLfloat) * 3;
+			attributeSize = 3;
 		}
 
 		int attributeLocation = glGetAttribLocation(texturedMeshProgram.handle, attributeName);
