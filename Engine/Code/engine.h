@@ -31,7 +31,8 @@ struct Texture
 enum Mode
 {
 	Mode_TexturedQuad,
-	Mode_Count
+	Mode_Count,
+	Mode_TexturedMesh
 };
 
 struct VertexV3V2 
@@ -134,13 +135,16 @@ struct App
 	// program indices
 	u32 texturedGeometryProgramIdx;
 	u32 texturedMeshProgramIdx;
-	
+
 	// texture indices
 	u32 diceTexIdx;
 	u32 whiteTexIdx;
 	u32 blackTexIdx;
 	u32 normalTexIdx;
 	u32 magentaTexIdx;
+
+	// model indices
+	u32 modelIdx;
 
 	// Mode
 	Mode mode;
@@ -152,6 +156,7 @@ struct App
 
 	// Location of the texture uniform in the textured quad shader
 	GLuint programUniformTexture;
+	GLuint texturedMeshProgram_uTexture;
 
 	// VAO object to link our screen filling quad with our textured quad shader
 	GLuint vao;
