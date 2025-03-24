@@ -159,7 +159,7 @@ struct App
 	GLuint texturedMeshProgram_uTexture;
 
 	// VAO object to link our screen filling quad with our textured quad shader
-	GLuint vao;
+	GLuint quadVAO;
 
 	// info about OpenGL
 	const unsigned char* glVersion;

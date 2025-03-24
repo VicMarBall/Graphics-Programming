@@ -252,113 +252,107 @@ void Init(App* app)
 
 	app->mode = Mode_TexturedMesh;
 
-	float vertices[] =
+	// quad
 	{
-		-0.5,	-0.5,	0,	0.0,	0.0, // bottom-left
-		0.5,	-0.5,	0,	1.0,	0.0, // bottom-right
-		0.5,	0.5,	0,	1.0,	1.0, // top-right
-		-0.5,	0.5,	0,	0.0,	1.0, // top-left
-	};
+		float vertices[] =
+		{
+			-0.5,	-0.5,	0,	0.0,	0.0, // bottom-left
+			0.5,	-0.5,	0,	1.0,	0.0, // bottom-right
+			0.5,	0.5,	0,	1.0,	1.0, // top-right
+			-0.5,	0.5,	0,	0.0,	1.0, // top-left
+		};
 
-	const u16 indexes[] =
-	{
-		0, 1, 2,
-		0, 2, 3
-	};
-
-	//vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
-	//vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3 * sizeof(float) });	// tex coordinates
-	//vertexBufferLayout.stride = 5 * sizeof(float);
+		const u16 indexes[] =
+		{
+			0, 1, 2,
+			0, 2, 3
+		};
 
 
-	// geometry
-	glGenBuffers(1, &app->embeddedVertices);
-	glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &app->embeddedElements);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	// attributes
-	glGenVertexArrays(1, &app->vao);
-	glBindVertexArray(app->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
-	glBindVertexArray(0);
-
-	app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
-	Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
-	app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
-
-	// geometry
-	app->modelIdx = LoadModel(app, "Patrick/patrick.obj");
-
-	// attributes
-	glGenVertexArrays(1, &app->vao);
-	glBindVertexArray(app->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
-	glBindVertexArray(0);
+		VertexBufferLayout vertexBufferLayout;
+		vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
+		vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 1, 2, 3 * sizeof(float) });	// tex coordinates
+		vertexBufferLayout.stride = 5 * sizeof(float);
 
 
-	app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
-	Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-	app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+		// geometry
+		glGenBuffers(1, &app->embeddedVertices);
+		glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// get vertex buffer layout
-	VertexBufferLayout vertexBufferLayout;
-	int attributeCount;
-	glGetProgramiv(texturedMeshProgram.handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
-	int attributeOffset = 0;
-	for (int i = 0; i < attributeCount; ++i) {
-		char attributeName[50];
-		int attributeNameLength;
-		GLint attributeSize;
-		GLenum attributeType;
+		glGenBuffers(1, &app->embeddedElements);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		int attributeByteSize = sizeof(GLfloat);
+		// attributes
+		glGenVertexArrays(1, &app->quadVAO);
+		glBindVertexArray(app->quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
 
-		glGetActiveAttrib(texturedMeshProgram.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
-
-		if (attributeType == GL_FLOAT_VEC2) {
-			attributeSize = 2;
-		}
-		if (attributeType == GL_FLOAT_VEC3) {
-			attributeSize = 3;
+		for (int i = 0; i < vertexBufferLayout.attributes.size(); ++i) {
+			glVertexAttribPointer(vertexBufferLayout.attributes[i].location, vertexBufferLayout.attributes[i].componentCount, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)vertexBufferLayout.attributes[i].offset);
+			glEnableVertexAttribArray(vertexBufferLayout.attributes[i].location);
 		}
 
-		int attributeLocation = glGetAttribLocation(texturedMeshProgram.handle, attributeName);
+		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
+		//glEnableVertexAttribArray(0);
+		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
+		//glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
+		glBindVertexArray(0);
 
-		vertexBufferLayout.attributes.push_back(VertexBufferAttribute{(u8)attributeLocation, (u8)attributeSize, (u8)attributeOffset});
+		app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
+		Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
+		app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
 
-		attributeOffset += attributeByteSize * attributeSize;
+		app->diceTexIdx = LoadTexture2D(app, "dice.png");
+		app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
+		app->blackTexIdx = LoadTexture2D(app, "color_black.png");
+		app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
+		app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 	}
-	vertexBufferLayout.stride = attributeOffset;
 
-	//vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
-	//vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2, 2, 3 * sizeof(float) });	// tex coordinates
-	//vertexBufferLayout.stride = 5 * sizeof(float);
+	// mesh
+	{
+		// geometry
+		app->modelIdx = LoadModel(app, "Patrick/patrick.obj");
 
-	texturedMeshProgram.vertexInputLayout = vertexBufferLayout;
+		app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
+		Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+		app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
+		// get vertex buffer layout
+		VertexBufferLayout vertexBufferLayout;
+		vertexBufferLayout.stride = 0;
+		int attributeCount;
+		glGetProgramiv(texturedMeshProgram.handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+		for (int i = 0; i < attributeCount; ++i) {
+			char attributeName[50];
+			int attributeNameLength;
+			GLint attributeSize;
+			GLenum attributeType;
 
-	app->diceTexIdx = LoadTexture2D(app, "dice.png");
-	app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
-	app->blackTexIdx = LoadTexture2D(app, "color_black.png");
-	app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
-	app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+			int attributeByteSize = sizeof(GLfloat);
 
+			glGetActiveAttrib(texturedMeshProgram.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
+
+			if (attributeType == GL_FLOAT_VEC2) {
+				attributeSize = 2;
+			}
+			if (attributeType == GL_FLOAT_VEC3) {
+				attributeSize = 3;
+			}
+
+			int attributeLocation = glGetAttribLocation(texturedMeshProgram.handle, attributeName);
+
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ (u8)attributeLocation, (u8)attributeSize, (u8)vertexBufferLayout.stride });
+
+			vertexBufferLayout.stride += attributeSize * attributeByteSize;
+		}
+		texturedMeshProgram.vertexInputLayout = vertexBufferLayout;
+	}
 }
 
 void Gui(App* app)
@@ -403,7 +397,7 @@ void Render(App* app)
 
 			Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
 			glUseProgram(programTexturedGeometry.handle);
-			glBindVertexArray(app->vao);
+			glBindVertexArray(app->quadVAO);
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -447,6 +441,9 @@ void Render(App* app)
 				Submesh& submesh = mesh.submeshes[i];
 				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 			}
+
+			glBindVertexArray(0);
+			glUseProgram(0);
 
 			break;
 		}
