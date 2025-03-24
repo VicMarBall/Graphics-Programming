@@ -99,6 +99,37 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
 	program.filepath = filepath;
 	program.programName = programName;
 	program.lastWriteTimestamp = GetFileLastWriteTimestamp(filepath);
+
+	// get program's vertex buffer layout
+	VertexBufferLayout vertexBufferLayout;
+	vertexBufferLayout.stride = 0;
+	int attributeCount;
+	glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+	for (int i = 0; i < attributeCount; ++i) {
+		char attributeName[50];
+		int attributeNameLength;
+		GLint attributeSize;
+		GLenum attributeType;
+
+		int attributeByteSize = sizeof(GLfloat);
+
+		glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
+
+		if (attributeType == GL_FLOAT_VEC2) {
+			attributeSize = 2;
+		}
+		if (attributeType == GL_FLOAT_VEC3) {
+			attributeSize = 3;
+		}
+
+		int attributeLocation = glGetAttribLocation(program.handle, attributeName);
+
+		vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ (u8)attributeLocation, (u8)attributeSize, (u8)vertexBufferLayout.stride });
+
+		vertexBufferLayout.stride += attributeSize * attributeByteSize;
+	}
+	program.vertexInputLayout = vertexBufferLayout;
+
 	app->programs.push_back(program);
 
 	return app->programs.size() - 1;
@@ -206,16 +237,20 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 
 			for (u32 j = 0; j < submesh.vertexBufferLayout.attributes.size(); ++j) 
 			{
-				const u32 index = submesh.vertexBufferLayout.attributes[j].location;
-				const u32 numComponents = submesh.vertexBufferLayout.attributes[j].componentCount;
-				const u32 offset = submesh.vertexBufferLayout.attributes[j].offset + submesh.vertexOffset;
-				const u32 stride = submesh.vertexBufferLayout.stride;
+				if (program.vertexInputLayout.attributes[i].location == submesh.vertexBufferLayout.attributes[j].location)
+				{
+					const u32 index = submesh.vertexBufferLayout.attributes[j].location;
+					const u32 numComponents = submesh.vertexBufferLayout.attributes[j].componentCount;
+					const u32 offset = submesh.vertexBufferLayout.attributes[j].offset + submesh.vertexOffset;
+					const u32 stride = submesh.vertexBufferLayout.stride;
 
-				glVertexAttribPointer(index, numComponents, GL_FLOAT, GL_FALSE, stride, (void*)(u64)offset);
-				glEnableVertexAttribArray(index);
-				
-				attributeIsLinked = true;
-				break;
+					glVertexAttribPointer(index, numComponents, GL_FLOAT, GL_FALSE, stride, (void*)(u64)offset);
+					glEnableVertexAttribArray(index);
+
+					attributeIsLinked = true;
+					break;
+
+				}
 			}
 
 			assert(attributeIsLinked);
@@ -319,39 +354,9 @@ void Init(App* app)
 		// geometry
 		app->modelIdx = LoadModel(app, "Patrick/patrick.obj");
 
+		// program
 		app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
 		Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-		app->texturedMeshProgram_uTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
-
-		// get vertex buffer layout
-		VertexBufferLayout vertexBufferLayout;
-		vertexBufferLayout.stride = 0;
-		int attributeCount;
-		glGetProgramiv(texturedMeshProgram.handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
-		for (int i = 0; i < attributeCount; ++i) {
-			char attributeName[50];
-			int attributeNameLength;
-			GLint attributeSize;
-			GLenum attributeType;
-
-			int attributeByteSize = sizeof(GLfloat);
-
-			glGetActiveAttrib(texturedMeshProgram.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
-
-			if (attributeType == GL_FLOAT_VEC2) {
-				attributeSize = 2;
-			}
-			if (attributeType == GL_FLOAT_VEC3) {
-				attributeSize = 3;
-			}
-
-			int attributeLocation = glGetAttribLocation(texturedMeshProgram.handle, attributeName);
-
-			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ (u8)attributeLocation, (u8)attributeSize, (u8)vertexBufferLayout.stride });
-
-			vertexBufferLayout.stride += attributeSize * attributeByteSize;
-		}
-		texturedMeshProgram.vertexInputLayout = vertexBufferLayout;
 	}
 }
 
@@ -423,6 +428,9 @@ void Render(App* app)
 
 			Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
 			glUseProgram(texturedMeshProgram.handle);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			Model& model = app->models[app->modelIdx];
 			Mesh& mesh = app->meshes[model.meshIdx];
