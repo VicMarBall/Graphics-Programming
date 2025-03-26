@@ -146,6 +146,8 @@ struct App
 	// scene
 	Scene scene;
 
+	GLuint uniformsBufferHandle;
+
 	// Mode
 	Mode mode;
 

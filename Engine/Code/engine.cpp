@@ -303,7 +303,6 @@ void Init(App* app)
 			0, 2, 3
 		};
 
-
 		VertexBufferLayout vertexBufferLayout;
 		vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
 		vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 1, 2, 3 * sizeof(float) });	// tex coordinates
@@ -360,6 +359,18 @@ void Init(App* app)
 		// program
 		gameObject.programID = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
 	}
+
+	int maxUniformBufferSize;
+	int uniformBlockAlignment;
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBlockAlignment);
+	
+	
+	// for each buffer you need
+	glGenBuffers(1, &app->uniformsBufferHandle);
+	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
+	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Gui(App* app)
@@ -379,6 +390,33 @@ void Gui(App* app)
 void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
+
+	glm::mat4 worldMatrix = glm::mat4();
+	
+	float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
+	float zNear = 0.1f;
+	float zFar = 1000.0f;
+	glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, zNear, zFar);
+	glm::mat4 view = glm::lookAt(app->scene.camera._pos, app->scene.camera._pos + app->scene.camera._forward, app->scene.camera._up);
+	
+	glm::mat4 worldViewProjectionMatrix = projection * view * worldMatrix;
+	
+	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
+	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	u32 bufferHead = 0;
+	
+	memcpy(bufferData + bufferHead, glm::value_ptr(worldMatrix), sizeof(glm::mat4));
+	bufferHead += sizeof(glm::mat4);
+	
+	memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
+	bufferHead += sizeof(glm::mat4);
+	
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
+	u32 blockOffset = 0;
+	u32 blockSize = sizeof(glm::mat4) * 2;
+	glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
 }
 
 void Render(App* app)
