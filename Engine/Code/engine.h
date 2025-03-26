@@ -5,6 +5,7 @@
 #pragma once
 
 #include "platform.h"
+#include "scene.h"
 #include <glad/glad.h>
 
 typedef glm::vec2  vec2;
@@ -134,7 +135,6 @@ struct App
 
 	// program indices
 	u32 texturedGeometryProgramIdx;
-	u32 texturedMeshProgramIdx;
 
 	// texture indices
 	u32 diceTexIdx;
@@ -143,8 +143,8 @@ struct App
 	u32 normalTexIdx;
 	u32 magentaTexIdx;
 
-	// model indices
-	u32 modelIdx;
+	// scene
+	Scene scene;
 
 	// Mode
 	Mode mode;

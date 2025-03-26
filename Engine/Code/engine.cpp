@@ -351,12 +351,14 @@ void Init(App* app)
 
 	// mesh
 	{
+		app->scene.gameObjects.push_back(GameObject());
+		GameObject& gameObject = app->scene.gameObjects.back();
+
 		// geometry
-		app->modelIdx = LoadModel(app, "Patrick/patrick.obj");
+		gameObject.modelID = LoadModel(app, "Patrick/patrick.obj");
 
 		// program
-		app->texturedMeshProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
-		Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+		gameObject.programID = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
 	}
 }
 
@@ -381,6 +383,11 @@ void Update(App* app)
 
 void Render(App* app)
 {
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
 	switch (app->mode)
 	{
 		case Mode_TexturedQuad:
@@ -395,11 +402,6 @@ void Render(App* app)
 			// - bind the vao
 			// - glDrawElements() !!!
 
-			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			glViewport(0, 0, app->displaySize.x, app->displaySize.y);
-
 			Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
 			glUseProgram(programTexturedGeometry.handle);
 			glBindVertexArray(app->quadVAO);
@@ -413,49 +415,44 @@ void Render(App* app)
 			glBindTexture(GL_TEXTURE_2D, textureHandle);
 
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
-			glBindVertexArray(0);
-			glUseProgram(0);
 			
 		break;
 		}
 		case Mode_TexturedMesh:
 		{
-			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			for (const GameObject& gameObject : app->scene.gameObjects)
+			{
+				Program& texturedMeshProgram = app->programs[gameObject.programID];
+				glUseProgram(texturedMeshProgram.handle);
 
-			glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-			glUseProgram(texturedMeshProgram.handle);
+				Model& model = app->models[gameObject.modelID];
+				Mesh& mesh = app->meshes[model.meshIdx];
 
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+					GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+					glBindVertexArray(vao);
 
-			Model& model = app->models[app->modelIdx];
-			Mesh& mesh = app->meshes[model.meshIdx];
+					u32 submeshMaterialIdx = model.materialIdx[i];
+					Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-			for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
-				GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
-				glBindVertexArray(vao);
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+					glUniform1i(app->texturedMeshProgram_uTexture, 0);
 
-				u32 submeshMaterialIdx = model.materialIdx[i];
-				Material& submeshMaterial = app->materials[submeshMaterialIdx];
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-				glUniform1i(app->texturedMeshProgram_uTexture, 0);
-
-				Submesh& submesh = mesh.submeshes[i];
-				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+					Submesh& submesh = mesh.submeshes[i];
+					glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+				}
 			}
-
-			glBindVertexArray(0);
-			glUseProgram(0);
-
 			break;
 		}
 		default:;
 	}
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+
 }
 
