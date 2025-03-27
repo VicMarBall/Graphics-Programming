@@ -68,8 +68,6 @@ struct App
 	std::vector<Mesh>     meshes;
 	std::vector<Model>    models;
 	std::vector<Program>  programs;
-
-
 };
 
 void Init(App* app);
