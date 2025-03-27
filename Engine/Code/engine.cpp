@@ -10,6 +10,7 @@
 #include <imgui.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
+#include <iostream>
 
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
@@ -363,6 +364,7 @@ void Init(App* app)
 	
 	
 	// for each buffer you need
+
 	glGenBuffers(1, &app->uniformsBufferHandle);
 	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
 	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
@@ -386,6 +388,8 @@ void Gui(App* app)
 void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
+
+	app->scene.camera._pos = vec3(0.0f, 0.0f, 0.0f);
 
 	glm::mat4 worldMatrix = glm::mat4();
 	
@@ -413,6 +417,8 @@ void Update(App* app)
 	u32 blockOffset = 0;
 	u32 blockSize = sizeof(glm::mat4) * 2;
 	glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
+
+
 }
 
 void Render(App* app)

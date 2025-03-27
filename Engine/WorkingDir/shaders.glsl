@@ -45,22 +45,22 @@ layout(location = 2) in vec2 aTexCoord;
 //layout(location = 3) in vec3 aTangent;
 //layout(location = 4) in vec3 aBitangent;
 
-//layout(binding = 1, std148) uniform LocalParams
-//{
-//	mat4 uWorldMatrix;
-//	mat4 uWorldViewProjectionMatrix;
-//}
+layout(binding = 1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+};
 
 out vec2 vTexCoord;
-//out vec3 vPosition; // in worldspace
-//out vec3 vNormal;   // in worldspace
+out vec3 vPosition; // in worldspace
+out vec3 vNormal;   // in worldspace
 
 void main()
 {
 	vTexCoord = aTexCoord;
-
-	//vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	//vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
 
 	//gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 	gl_Position = vec4(aPosition, 5.0);
