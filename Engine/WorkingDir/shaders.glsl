@@ -59,8 +59,10 @@ void main()
 {
 	vTexCoord = aTexCoord;
 	
-	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	vPosition = aPosition;
+	// vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = aNormal;
+	// vec3(uWorldMatrix * vec4(aNormal, 0.0));
 
 	//gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 	gl_Position = vec4(aPosition, 5.0);
@@ -69,6 +71,8 @@ void main()
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
 in vec2 vTexCoord;
+in vec3 vPosition;
+in vec3 vNormal;
 
 uniform sampler2D uTexture;
 
@@ -77,6 +81,7 @@ layout(location = 0) out vec4 oColor;
 void main()
 {
 	oColor = texture(uTexture, vTexCoord);
+	oColor = vec4(vPosition, 1.0f);
 }
 
 #endif
