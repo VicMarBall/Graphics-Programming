@@ -278,6 +278,7 @@ void Init(App* app)
 		app->glExtensions = glGetStringi(GL_EXTENSIONS, GLuint(i));
 	}
 
+	app->scene.camera.translate(vec3(0.0f, 0.0f, -10.0f));
 
 	// TODO: Initialize your resources here!
 	// - vertex buffers
@@ -389,37 +390,17 @@ void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
 
-	
-	app->scene.camera._transform = glm::identity<glm::mat4>();
-	app->scene.camera._pos = vec3(0.0f, 0.0f, -10.0f);
+	// when minimizing the window, displaySize.y == 0 -> displaySize.x/0 -> error
+	if (app->displaySize.y > 0) {
+		float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
+		app->projection = glm::perspective(glm::radians(60.0f), aspectRatio, app->scene.camera.zNear, app->scene.camera.zFar);
+		app->view = glm::lookAt(app->scene.camera.getPosition(), app->scene.camera.getPosition() + app->scene.camera.getForward(), app->scene.camera.getUp());
+	}
 
-	glm::mat4 worldMatrix = glm::identity<glm::mat4>();
-	
-	float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
-	float zNear = 0.1f;
-	float zFar = 1000.0f;
-	glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, zNear, zFar);
-	glm::mat4 view = glm::lookAt(app->scene.camera._pos, app->scene.camera._pos + app->scene.camera._forward, app->scene.camera._up);
-	
-	glm::mat4 worldViewProjectionMatrix = projection * view * worldMatrix;
-	
-	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
-	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	u32 bufferHead = 0;
-	
-	memcpy(bufferData + bufferHead, glm::value_ptr(worldMatrix), sizeof(glm::mat4));
-	bufferHead += sizeof(glm::mat4);
-	
-	memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
-	bufferHead += sizeof(glm::mat4);
-	
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	
-	u32 blockOffset = 0;
-	u32 blockSize = sizeof(glm::mat4) * 2;
-	glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
-
+	for (GameObject& gameObject : app->scene.gameObjects)
+	{
+		gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
+	}
 
 }
 
@@ -471,6 +452,26 @@ void Render(App* app)
 
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+				glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.getTransform();
+
+				glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
+				u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+				u32 bufferHead = 0;
+
+				memcpy(bufferData + bufferHead, glm::value_ptr(gameObject.getTransform()), sizeof(glm::mat4));
+				bufferHead += sizeof(glm::mat4);
+
+				memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
+				bufferHead += sizeof(glm::mat4);
+
+				glUnmapBuffer(GL_UNIFORM_BUFFER);
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+				u32 blockOffset = 0;
+				u32 blockSize = sizeof(glm::mat4) * 2;
+				glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
+
 
 				Model& model = app->models[gameObject.modelID];
 				Mesh& mesh = app->meshes[model.meshIdx];

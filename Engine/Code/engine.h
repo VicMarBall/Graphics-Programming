@@ -54,6 +54,10 @@ struct App
 	// VAO object to link our screen filling quad with our textured quad shader
 	GLuint quadVAO;
 
+	// transformation matrices
+	glm::mat4 projection;
+	glm::mat4 view;
+
 	// info about OpenGL
 	const unsigned char* glVersion;
 	const unsigned char* glRenderer;
