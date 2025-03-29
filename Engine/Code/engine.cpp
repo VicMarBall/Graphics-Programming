@@ -416,11 +416,9 @@ void Update(App* app)
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
-#define BINDING(b) b
-
 	u32 blockOffset = 0;
 	u32 blockSize = sizeof(glm::mat4) * 2;
-	glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformsBufferHandle, blockOffset, blockSize);
+	glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
 
 
 }
