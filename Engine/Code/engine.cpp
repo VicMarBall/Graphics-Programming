@@ -331,7 +331,7 @@ void Init(App* app)
 			glEnableVertexAttribArray(vertexBufferLayout.attributes[i].location);
 		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
 		glBindVertexArray(0);
 
 		app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
@@ -389,9 +389,11 @@ void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
 
-	app->scene.camera._pos = vec3(0.0f, 0.0f, 0.0f);
+	
+	app->scene.camera._transform = glm::identity<glm::mat4>();
+	app->scene.camera._pos = vec3(0.0f, 0.0f, -10.0f);
 
-	glm::mat4 worldMatrix = glm::mat4();
+	glm::mat4 worldMatrix = glm::identity<glm::mat4>();
 	
 	float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
 	float zNear = 0.1f;
@@ -414,9 +416,11 @@ void Update(App* app)
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	
+#define BINDING(b) b
+
 	u32 blockOffset = 0;
 	u32 blockSize = sizeof(glm::mat4) * 2;
-	glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
+	glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformsBufferHandle, blockOffset, blockSize);
 
 
 }
@@ -427,6 +431,8 @@ void Render(App* app)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+	glEnable(GL_DEPTH_TEST);
 
 	switch (app->mode)
 	{

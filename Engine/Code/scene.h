@@ -17,10 +17,10 @@ public:
 	union {
 		glm::mat4 _transform;
 		struct {
-			glm::vec3 _right;	double _paddingX;
-			glm::vec3 _up;		double _paddingY;
-			glm::vec3 _forward;	double _paddingZ;
-			glm::vec3 _pos;		double _paddingW;
+			glm::vec3 _right;	float _paddingX;
+			glm::vec3 _up;		float _paddingY;
+			glm::vec3 _forward;	float _paddingZ;
+			glm::vec3 _pos;		float _paddingW;
 		};
 	};
 };
@@ -46,10 +46,10 @@ private:
 	union {
 		glm::mat4 _transform;
 		struct {
-			glm::vec3 _right;	double _paddingX;
-			glm::vec3 _up;		double _paddingY;
-			glm::vec3 _forward;	double _paddingZ;
-			glm::vec3 _pos;		double _paddingW;
+			glm::vec3 _right;	float _paddingX;
+			glm::vec3 _up;		float _paddingY;
+			glm::vec3 _forward;	float _paddingZ;
+			glm::vec3 _pos;		float _paddingW;
 		};
 	};
 

@@ -59,13 +59,12 @@ void main()
 {
 	vTexCoord = aTexCoord;
 	
-	vPosition = aPosition;
-	// vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = aNormal;
-	// vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
 
-	//gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
-	gl_Position = vec4(aPosition, 5.0);
+	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+
+	gl_Position.z = -gl_Position.z;
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
@@ -81,7 +80,6 @@ layout(location = 0) out vec4 oColor;
 void main()
 {
 	oColor = texture(uTexture, vTexCoord);
-	oColor = vec4(vPosition, 1.0f);
 }
 
 #endif
