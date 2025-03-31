@@ -64,6 +64,8 @@ public:
 	void rotate(float angle, glm::vec3 axis) { _transform = _transform * glm::rotate(glm::radians(angle), axis); }
 	void scale(glm::vec3 scale) { _transform = glm::scale(_transform, scale); }
 
+	u32 uniformBufferHead;
+
 private:
 	// model matrix / world matrix
 	union {

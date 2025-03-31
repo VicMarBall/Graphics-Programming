@@ -352,16 +352,26 @@ void Init(App* app)
 		GameObject& gameObject = app->scene.gameObjects.back();
 
 		// geometry
-		gameObject.modelID = LoadModel(app, "Patrick/patrick.obj");
+		u32 modelID = LoadModel(app, "Patrick/patrick.obj");
+		gameObject.modelID = modelID;
 
 		// program
-		gameObject.programID = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
+		u32 programID = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
+		gameObject.programID = programID;
+
+		app->scene.gameObjects.push_back(GameObject());
+		GameObject& gameObject2 = app->scene.gameObjects.back();
+
+		gameObject2.modelID = modelID;
+		gameObject2.programID = programID;
+
+		gameObject2.translate(vec3(5.0f, 0.0f, 0.0f));
 	}
 
 	int maxUniformBufferSize;
-	int uniformBlockAlignment;
+	//int uniformBlockAlignment;
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
-	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBlockAlignment);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 	
 	
 	// for each buffer you need
@@ -386,6 +396,11 @@ void Gui(App* app)
 	ImGui::End();
 }
 
+u32 Align(u32 value, u32 alignment)
+{
+	return (value + alignment - 1) & ~(alignment - 1);
+}
+
 void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
@@ -397,11 +412,33 @@ void Update(App* app)
 		app->view = glm::lookAt(app->scene.camera.getPosition(), app->scene.camera.getPosition() + app->scene.camera.getForward(), app->scene.camera.getUp());
 	}
 
-	for (GameObject& gameObject : app->scene.gameObjects)
-	{
-		gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
-	}
+	GameObject& gameObject = app->scene.gameObjects.back();
+	gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
 
+
+	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
+	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	u32 bufferHead = 0;
+
+
+	// prepare the local uniforms
+	for (GameObject& gameObject : app->scene.gameObjects) 
+	{
+		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.getTransform();
+
+		bufferHead = Align(bufferHead, app->uniformBlockAlignment);
+
+		gameObject.uniformBufferHead = bufferHead;
+
+		memcpy(bufferData + bufferHead, glm::value_ptr(gameObject.getTransform()), sizeof(glm::mat4));
+		bufferHead += sizeof(glm::mat4);
+
+		memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
+		bufferHead += sizeof(glm::mat4);
+
+		glUnmapBuffer(GL_UNIFORM_BUFFER);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
 }
 
 void Render(App* app)
@@ -445,34 +482,21 @@ void Render(App* app)
 		}
 		case Mode_TexturedMesh:
 		{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			for (const GameObject& gameObject : app->scene.gameObjects)
 			{
-				Program& texturedMeshProgram = app->programs[gameObject.programID];
-				glUseProgram(texturedMeshProgram.handle);
-
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-				glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.getTransform();
-
-				glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
-				u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-				u32 bufferHead = 0;
-
-				memcpy(bufferData + bufferHead, glm::value_ptr(gameObject.getTransform()), sizeof(glm::mat4));
-				bufferHead += sizeof(glm::mat4);
-
-				memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
-				bufferHead += sizeof(glm::mat4);
-
-				glUnmapBuffer(GL_UNIFORM_BUFFER);
-				glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-				u32 blockOffset = 0;
+				// set the block of the uniform
+				u32 blockOffset = gameObject.uniformBufferHead;
 				u32 blockSize = sizeof(glm::mat4) * 2;
 				glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
 
+				// use the program
+				Program& texturedMeshProgram = app->programs[gameObject.programID];
+				glUseProgram(texturedMeshProgram.handle);
 
+				// draw the mesh
 				Model& model = app->models[gameObject.modelID];
 				Mesh& mesh = app->meshes[model.meshIdx];
 

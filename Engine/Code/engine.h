@@ -38,6 +38,8 @@ struct App
 	Scene scene;
 
 	GLuint uniformsBufferHandle;
+	
+	int uniformBlockAlignment;
 
 	// Mode
 	Mode mode;
