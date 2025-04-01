@@ -376,10 +376,17 @@ void Init(App* app)
 	
 	// for each buffer you need
 
-	glGenBuffers(1, &app->uniformsBufferHandle);
-	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
-	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	app->uniformsBuffer = CreateBuffer(maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STREAM_DRAW);
+
+	//glGenBuffers(1, &app->globalUniformBuffer.handle);
+	//glBindBuffer(GL_UNIFORM_BUFFER, app->globalUniformBuffer.handle);
+	//glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
+	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	//glGenBuffers(1, &app->uniformsBufferHandle);
+	//glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
+	//glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
+	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Gui(App* app)
@@ -396,11 +403,6 @@ void Gui(App* app)
 	ImGui::End();
 }
 
-u32 Align(u32 value, u32 alignment)
-{
-	return (value + alignment - 1) & ~(alignment - 1);
-}
-
 void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
@@ -412,33 +414,46 @@ void Update(App* app)
 		app->view = glm::lookAt(app->scene.camera.getPosition(), app->scene.camera.getPosition() + app->scene.camera.getForward(), app->scene.camera.getUp());
 	}
 
+	// global uniforms
+	app->globalUniformHead = app->uniformsBuffer.head;
+
+	PushVec3(app->uniformsBuffer, app->scene.camera.getPosition());
+	PushUInt(app->uniformsBuffer, app->scene.lights.size());
+
+	for (u32 i = 0; i < app->scene.lights.size(); ++i) 
+	{
+		AlignHead(app->uniformsBuffer, sizeof(vec4));
+
+		Light& light = app->scene.lights[i];
+		PushUInt(app->uniformsBuffer, light.type);
+		PushVec3(app->uniformsBuffer, light.color);
+		PushVec3(app->uniformsBuffer, light.direction);
+		PushVec3(app->uniformsBuffer, light.position);
+	}
+
+	app->globalUniformSize = app->uniformsBuffer.head - app->globalUniformHead;
+
 	GameObject& gameObject = app->scene.gameObjects.back();
 	gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
 
-
-	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBufferHandle);
+	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBuffer.handle);
 	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	u32 bufferHead = 0;
-
 
 	// prepare the local uniforms
 	for (GameObject& gameObject : app->scene.gameObjects) 
 	{
+		AlignHead(app->uniformsBuffer, app->uniformBlockAlignment);
+
 		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.getTransform();
 
-		bufferHead = Align(bufferHead, app->uniformBlockAlignment);
-
-		gameObject.uniformBufferHead = bufferHead;
-
-		memcpy(bufferData + bufferHead, glm::value_ptr(gameObject.getTransform()), sizeof(glm::mat4));
-		bufferHead += sizeof(glm::mat4);
-
-		memcpy(bufferData + bufferHead, glm::value_ptr(worldViewProjectionMatrix), sizeof(glm::mat4));
-		bufferHead += sizeof(glm::mat4);
-
-		glUnmapBuffer(GL_UNIFORM_BUFFER);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		gameObject.localUniformBufferHead = app->uniformsBuffer.head;
+		PushMat4(app->uniformsBuffer, gameObject.getTransform());
+		PushMat4(app->uniformsBuffer, worldViewProjectionMatrix);
+		gameObject.localUniformBufferSize = app->uniformsBuffer.head - gameObject.localUniformBufferHead;
 	}
+
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Render(App* app)
@@ -485,12 +500,14 @@ void Render(App* app)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+			glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
+
 			for (const GameObject& gameObject : app->scene.gameObjects)
 			{
 				// set the block of the uniform
-				u32 blockOffset = gameObject.uniformBufferHead;
-				u32 blockSize = sizeof(glm::mat4) * 2;
-				glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBufferHandle, blockOffset, blockSize);
+				u32 blockOffset = gameObject.localUniformBufferHead;
+				u32 blockSize = gameObject.localUniformBufferSize;
+				glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
 
 				// use the program
 				Program& texturedMeshProgram = app->programs[gameObject.programID];

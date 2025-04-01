@@ -101,6 +101,9 @@
     <ClInclude Include="Code\resources.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Code\buffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">

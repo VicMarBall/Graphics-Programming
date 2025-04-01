@@ -64,8 +64,8 @@ public:
 	void rotate(float angle, glm::vec3 axis) { _transform = _transform * glm::rotate(glm::radians(angle), axis); }
 	void scale(glm::vec3 scale) { _transform = glm::scale(_transform, scale); }
 
-	u32 uniformBufferHead;
-
+	u32 localUniformBufferHead;
+	u32 localUniformBufferSize;
 private:
 	// model matrix / world matrix
 	union {
@@ -80,10 +80,24 @@ private:
 
 };
 
+enum LightType
+{
+	LightType_Directional,
+	LightType_Point
+};
+
+struct Light 
+{
+	LightType type;
+	glm::vec3 color;
+	glm::vec3 direction;
+	glm::vec3 position;
+};
 
 class Scene 
 {
 public:
 	Camera camera;
 	std::vector<GameObject> gameObjects;
+	std::vector<Light> lights;
 };

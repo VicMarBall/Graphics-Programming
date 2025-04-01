@@ -6,6 +6,7 @@
 
 #include "platform.h"
 #include "scene.h"
+#include "buffer.h"
 #include "resources.h"
 #include <glad/glad.h>
 
@@ -36,8 +37,6 @@ struct App
 
 	// scene
 	Scene scene;
-
-	GLuint uniformsBufferHandle;
 	
 	int uniformBlockAlignment;
 
@@ -59,6 +58,11 @@ struct App
 	// transformation matrices
 	glm::mat4 projection;
 	glm::mat4 view;
+
+	Buffer uniformsBuffer;
+	u32 globalUniformHead;
+	u32 globalUniformSize;
+
 
 	// info about OpenGL
 	const unsigned char* glVersion;
