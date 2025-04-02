@@ -7,6 +7,7 @@
 
 #include "engine.h"
 #include "assimpImport.h"
+#include "buffer.h"
 #include <imgui.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
@@ -414,8 +415,13 @@ void Update(App* app)
 		app->view = glm::lookAt(app->scene.camera.getPosition(), app->scene.camera.getPosition() + app->scene.camera.getForward(), app->scene.camera.getUp());
 	}
 
+	GameObject& gameObject = app->scene.gameObjects.back();
+	gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
+
 	// global uniforms
 	app->globalUniformHead = app->uniformsBuffer.head;
+
+	MapBuffer(app->uniformsBuffer, GL_WRITE_ONLY);
 
 	PushVec3(app->uniformsBuffer, app->scene.camera.getPosition());
 	PushUInt(app->uniformsBuffer, app->scene.lights.size());
@@ -433,11 +439,6 @@ void Update(App* app)
 
 	app->globalUniformSize = app->uniformsBuffer.head - app->globalUniformHead;
 
-	GameObject& gameObject = app->scene.gameObjects.back();
-	gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
-
-	glBindBuffer(GL_UNIFORM_BUFFER, app->uniformsBuffer.handle);
-	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
 
 	// prepare the local uniforms
 	for (GameObject& gameObject : app->scene.gameObjects) 
