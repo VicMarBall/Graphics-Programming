@@ -212,6 +212,48 @@ u32 LoadTexture2D(App* app, const char* filepath)
 	}
 }
 
+void CreateFrameBuffers(App* app)
+{
+	// color
+	GLuint colorFrameBufferHandle;
+	glGenTextures(1, &colorFrameBufferHandle);
+	glBindTexture(GL_TEXTURE_2D, colorFrameBufferHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// depth
+	GLuint depthFrameBufferHandle;
+	glGenTextures(1, &depthFrameBufferHandle);
+	glBindTexture(GL_TEXTURE_2D, depthFrameBufferHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	GLuint frameBufferHandle;
+	glGenFramebuffers(1, &frameBufferHandle);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferHandle);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorFrameBufferHandle, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthFrameBufferHandle, 0);
+
+	GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if () 
+	{
+
+	}
+
+	glDrawBuffers(1, &colorFrameBufferHandle);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 	Submesh& submesh = mesh.submeshes[submeshIndex];
 
@@ -278,6 +320,8 @@ void Init(App* app)
 	for (int i = 0; i < app->glNumExtensions; ++i) {
 		app->glExtensions = glGetStringi(GL_EXTENSIONS, GLuint(i));
 	}
+
+	CreateFrameBuffers(app);
 
 	app->scene.camera.translate(vec3(0.0f, 0.0f, -10.0f));
 
