@@ -54,13 +54,6 @@ layout(location = 2) in vec2 aTexCoord;
 //layout(location = 3) in vec3 aTangent;
 //layout(location = 4) in vec3 aBitangent;
 
-layout(binding = 0, std140) uniform GlobalParams
-{
-	vec3 uCameraPosition;
-	unsigned int uLightCount;
-	Light uLight[16];
-};
-
 layout(binding = 1, std140) uniform LocalParams
 {
 	mat4 uWorldMatrix;
@@ -89,11 +82,27 @@ in vec3 vNormal;
 
 uniform sampler2D uTexture;
 
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[16];
+};
+
 layout(location = 0) out vec4 oColor;
 
 void main()
 {
-	oColor = texture(uTexture, vTexCoord);
+	vec4 baseColor = texture(uTexture, vTexCoord);
+	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < uLightCount; ++i)
+	{
+		// directional
+		lightColor += dot(vNormal, normalize(uLight[i].direction)) * uLight[i].color;
+	}
+
+	oColor = baseColor * vec4(lightColor, 1.0f);
 }
 
 #endif

@@ -374,6 +374,15 @@ void Init(App* app)
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 	
+
+	Light light;
+	light.type = LightType_Directional;
+	light.color = vec3(1.0f, 1.0f, 1.0f);
+	light.direction = vec3(0.0f, -1.0f, -1.0f);
+	light.position = vec3(0.0f, 0.0f, 0.0f);
+
+	app->scene.lights.push_back(light);
+
 	
 	// for each buffer you need
 
