@@ -90,19 +90,24 @@ layout(binding = 0, std140) uniform GlobalParams
 };
 
 layout(location = 0) out vec4 oColor;
+layout(location = 1) out vec4 oNormal;
 
 void main()
 {
-	vec4 baseColor = texture(uTexture, vTexCoord);
-	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
+//	vec4 baseColor = texture(uTexture, vTexCoord);
+//	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
 
-	for (int i = 0; i < uLightCount; ++i)
-	{
-		// directional
-		lightColor += dot(vNormal, normalize(uLight[i].direction)) * uLight[i].color;
-	}
+//	for (int i = 0; i < uLightCount; ++i)
+//	{
+//		// directional
+//		lightColor += dot(vNormal, normalize(uLight[i].direction)) * uLight[i].color;
+//	}
 
-	oColor = baseColor * vec4(lightColor, 1.0f);
+//	oColor = baseColor * vec4(lightColor, 1.0f);
+
+	oColor = texture(uTexture, vTexCoord);
+	oNormal = vec4(vNormal, 1.0);
+
 }
 
 #endif

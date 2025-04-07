@@ -63,6 +63,13 @@ struct App
 	u32 globalUniformHead;
 	u32 globalUniformSize;
 
+	// framebuffer
+	GLuint framebufferHandle;
+
+	// attachments
+	GLuint colorAttachmentHandle;
+	GLuint normalAttachmentHandle;
+	GLuint depthAttachmentHandle;
 
 	// info about OpenGL
 	const unsigned char* glVersion;
