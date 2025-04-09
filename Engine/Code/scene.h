@@ -82,8 +82,8 @@ private:
 
 enum LightType
 {
-	LightType_Directional,
-	LightType_Point
+	LightType_Point,
+	LightType_Directional
 };
 
 struct Light 

@@ -51,8 +51,16 @@ void main()
 	
 	for (int i = 0; i < uLightCount; ++i)
 	{
-		// directional
-		lightColor += max(0.0f, -dot(normals.xyz, normalize(uLight[i].direction))) * uLight[i].color;
+		switch (uLight[i].type)
+		{
+		case 0: // point light
+			break;
+		case 1: // directional
+			lightColor += max(0.0f, -dot(normals.xyz, normalize(uLight[i].direction))) * uLight[i].color;
+			break;
+		default:
+			break;
+		}
 	}
 	
 	oColor = baseColor * vec4(lightColor, 1.0f);
