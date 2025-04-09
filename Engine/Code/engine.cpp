@@ -406,7 +406,8 @@ void Init(App* app)
 
 		app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
 		Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
-		app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
+		app->programUniformTextureAlbedo = glGetUniformLocation(texturedGeometryProgram.handle, "uAlbedo");
+		app->programUniformTextureNormals = glGetUniformLocation(texturedGeometryProgram.handle, "uNormals");
 
 		app->diceTexIdx = LoadTexture2D(app, "dice.png");
 		app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
@@ -446,7 +447,7 @@ void Init(App* app)
 	Light light;
 	light.type = LightType_Directional;
 	light.color = vec3(1.0f, 1.0f, 1.0f);
-	light.direction = vec3(0.0f, -1.0f, -1.0f);
+	light.direction = vec3(0.0f, -1.0f, 0.0f);
 	light.position = vec3(0.0f, 0.0f, 0.0f);
 
 	app->scene.lights.push_back(light);
@@ -572,7 +573,7 @@ void Render(App* app)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			glUniform1i(app->programUniformTexture, 0);
+			glUniform1i(app->programUniformTextureAlbedo, 0);
 			glActiveTexture(GL_TEXTURE0);
 			GLuint textureHandle = app->textures[app->diceTexIdx].handle;
 			glBindTexture(GL_TEXTURE_2D, textureHandle);
@@ -632,9 +633,18 @@ void Render(App* app)
 
 	glDisable(GL_DEPTH_TEST);
 
-	glUniform1i(app->programUniformTexture, 0);
+	// clear color and depth
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform1i(app->programUniformTextureAlbedo, 0);
 	glActiveTexture(GL_TEXTURE0);
 	GLuint textureHandle = app->colorAttachmentHandle;
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+	glUniform1i(app->programUniformTextureNormals, 1);
+	glActiveTexture(GL_TEXTURE1);
+	textureHandle = app->normalAttachmentHandle;
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);

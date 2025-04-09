@@ -30,13 +30,32 @@ void main()
 
 in vec2 vTexCoord;
 
-uniform sampler2D uTexture;
+uniform sampler2D uAlbedo;
+uniform sampler2D uNormals;
 
 layout(location = 0) out vec4 oColor;
 
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[16];
+};
+
 void main()
 {
-	oColor = texture(uTexture, vTexCoord);
+	vec4 baseColor = texture(uAlbedo, vTexCoord);
+	vec4 normals = texture(uNormals, vTexCoord);
+
+	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
+	
+	for (int i = 0; i < uLightCount; ++i)
+	{
+		// directional
+		lightColor += max(0.0f, -dot(normals.xyz, normalize(uLight[i].direction))) * uLight[i].color;
+	}
+	
+	oColor = baseColor * vec4(lightColor, 1.0f);
 }
 
 #endif
