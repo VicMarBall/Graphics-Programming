@@ -336,6 +336,9 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 
 void Init(App* app)
 {
+	app->framebufferToDisplay = FramebufferType::FINAL;
+	app->UIshowInfo = false;
+
 	app->glVersion = glGetString(GL_VERSION);
 	app->glRenderer = glGetString(GL_RENDERER);
 	app->glVendor = glGetString(GL_VENDOR);
@@ -470,14 +473,40 @@ void Init(App* app)
 
 void Gui(App* app)
 {
-	ImGui::Begin("Info");
-	ImGui::Text("FPS: %f", 1.0f / app->deltaTime);
-	ImGui::Text("OpenGL Version: %s", app->glVersion);
-	ImGui::Text("OpenGL Renderer: %s", app->glRenderer);
-	ImGui::Text("OpenGL Vendor: %s", app->glVendor);
-	ImGui::Text("OpenGL Shading Language Version: %s", app->glShadingLanguageVersion);
-	ImGui::Text("OpenGL Number of Extensions: %d", app->glNumExtensions);
-	ImGui::Text("OpenGL Extensions: %s", app->glExtensions);
+	if (app->UIshowInfo) {
+		ImGui::Begin("Info", &app->UIshowInfo);
+
+		ImGui::Text("FPS: %f", 1.0f / app->deltaTime);
+		ImGui::Text("OpenGL Version: %s", app->glVersion);
+		ImGui::Text("OpenGL Renderer: %s", app->glRenderer);
+		ImGui::Text("OpenGL Vendor: %s", app->glVendor);
+		ImGui::Text("OpenGL Shading Language Version: %s", app->glShadingLanguageVersion);
+		ImGui::Text("OpenGL Number of Extensions: %d", app->glNumExtensions);
+		ImGui::Text("OpenGL Extensions: %s", app->glExtensions);
+
+		ImGui::End();
+	}
+
+
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("General")) {
+			
+			if (ImGui::MenuItem("Info")) { app->UIshowInfo = true; }
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Display")) {
+
+			if (ImGui::MenuItem("Final")) { app->framebufferToDisplay = FramebufferType::FINAL; }
+			if (ImGui::MenuItem("Albedo")) { app->framebufferToDisplay = FramebufferType::ALBEDO; }
+			if (ImGui::MenuItem("Normals")) { app->framebufferToDisplay = FramebufferType::NORMAL; }
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenuBar();
+	}
 
 	ImGui::End();
 }
@@ -637,18 +666,41 @@ void Render(App* app)
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform1i(app->programUniformTextureAlbedo, 0);
-	glActiveTexture(GL_TEXTURE0);
-	GLuint textureHandle = app->colorAttachmentHandle;
-	glBindTexture(GL_TEXTURE_2D, textureHandle);
+	GLuint textureHandle;
 
-	glUniform1i(app->programUniformTextureNormals, 1);
-	glActiveTexture(GL_TEXTURE1);
-	textureHandle = app->normalAttachmentHandle;
-	glBindTexture(GL_TEXTURE_2D, textureHandle);
+	switch (app->framebufferToDisplay)
+	{
+	case (FramebufferType::FINAL):
+		glUniform1i(app->programUniformTextureAlbedo, 0);
+		glActiveTexture(GL_TEXTURE0);
+		textureHandle = app->colorAttachmentHandle;
+		glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+		glUniform1i(app->programUniformTextureNormals, 1);
+		glActiveTexture(GL_TEXTURE1);
+		textureHandle = app->normalAttachmentHandle;
+		glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+		break;
+	case (FramebufferType::ALBEDO):
+		glUniform1i(app->programUniformTextureAlbedo, 0);
+		glActiveTexture(GL_TEXTURE0);
+		textureHandle = app->colorAttachmentHandle;
+		glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+		break;
+	case (FramebufferType::NORMAL):
+		glUniform1i(app->programUniformTextureNormals, 1);
+		glActiveTexture(GL_TEXTURE1);
+		textureHandle = app->normalAttachmentHandle;
+		glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+		break;
+	default:
+		break;
+	}
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
 
 	glBindVertexArray(0);
 	glUseProgram(0);

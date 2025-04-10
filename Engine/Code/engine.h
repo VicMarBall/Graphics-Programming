@@ -10,6 +10,13 @@
 #include "resources.h"
 #include <glad/glad.h>
 
+enum FramebufferType
+{
+	FINAL,
+	ALBEDO,
+	NORMAL,
+};
+
 struct App
 {
 	// Loop
@@ -79,6 +86,10 @@ struct App
 	const unsigned char* glShadingLanguageVersion;
 	int glNumExtensions;
 	const unsigned char* glExtensions;
+
+	// imgui UI
+	bool UIshowInfo;
+	FramebufferType framebufferToDisplay;
 
 	// resources
 	std::vector<Texture>  textures;
