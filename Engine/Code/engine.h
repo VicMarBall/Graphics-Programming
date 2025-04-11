@@ -16,6 +16,7 @@ enum FramebufferType
 	ALBEDO,
 	NORMAL,
 	POSITION,
+	LIGHTS,
 };
 
 struct App

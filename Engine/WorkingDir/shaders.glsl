@@ -52,13 +52,16 @@ void main()
 	vec4 normals = texture(uNormals, vTexCoord);
 	vec4 position = texture(uPosition, vTexCoord);
 
-	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
-
+	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);	
 	for (int i = 0; i < uLightCount; ++i)
 	{
 		switch (uLight[i].type)
 		{
 		case 0: // point light
+			float distanceToPoint = distance(uLight[i].position, position.xyz);
+			vec3 directionVector = position.xyz - uLight[i].position;
+
+			lightColor += max(0.0f, -dot(normals.xyz, normalize(directionVector))) * uLight[i].color / distanceToPoint;
 			break;
 		case 1: // directional
 			lightColor += max(0.0f, -dot(normals.xyz, normalize(uLight[i].direction))) * uLight[i].color;
@@ -81,6 +84,9 @@ void main()
 		break;
 	case 3: // position
 		oColor = position;
+		break;
+	case 4: // lights
+		oColor = vec4(lightColor, 1.0f);
 		break;
 	default: 
 		break;

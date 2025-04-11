@@ -462,10 +462,10 @@ void Init(App* app)
 	
 
 	Light light;
-	light.type = LightType_Directional;
+	light.type = LightType_Point;
 	light.color = vec3(1.0f, 1.0f, 1.0f);
 	light.direction = vec3(0.0f, -1.0f, 0.0f);
-	light.position = vec3(0.0f, 0.0f, 0.0f);
+	light.position = vec3(0.0f, 2.0f, -1.0f);
 
 	app->scene.lights.push_back(light);
 
@@ -516,6 +516,7 @@ void Gui(App* app)
 			if (ImGui::MenuItem("Albedo")) { app->framebufferToDisplay = FramebufferType::ALBEDO; }
 			if (ImGui::MenuItem("Normals")) { app->framebufferToDisplay = FramebufferType::NORMAL; }
 			if (ImGui::MenuItem("Position")) { app->framebufferToDisplay = FramebufferType::POSITION; }
+			if (ImGui::MenuItem("Lights")) { app->framebufferToDisplay = FramebufferType::LIGHTS; }
 
 			ImGui::EndMenu();
 		}
