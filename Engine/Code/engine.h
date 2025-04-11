@@ -15,6 +15,7 @@ enum FramebufferType
 	FINAL,
 	ALBEDO,
 	NORMAL,
+	POSITION,
 };
 
 struct App
@@ -59,6 +60,7 @@ struct App
 	GLuint programCurrentFramebufferLocation;
 	GLuint programUniformTextureAlbedo;
 	GLuint programUniformTextureNormals;
+	GLuint programUniformTexturePosition;
 	GLuint texturedMeshProgram_uTexture;
 
 	// VAO object to link our screen filling quad with our textured quad shader
@@ -78,6 +80,7 @@ struct App
 	// attachments
 	GLuint colorAttachmentHandle;
 	GLuint normalAttachmentHandle;
+	GLuint positionAttachmentHandle;
 	GLuint depthAttachmentHandle;
 
 	// info about OpenGL

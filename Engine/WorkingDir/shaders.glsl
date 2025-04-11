@@ -34,6 +34,7 @@ uniform unsigned int usedFramebuffer;
 
 uniform sampler2D uAlbedo;
 uniform sampler2D uNormals;
+uniform sampler2D uPosition;
 
 layout(location = 0) out vec4 oColor;
 
@@ -49,6 +50,7 @@ void main()
 
 	vec4 baseColor = texture(uAlbedo, vTexCoord);
 	vec4 normals = texture(uNormals, vTexCoord);
+	vec4 position = texture(uPosition, vTexCoord);
 
 	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
 
@@ -76,6 +78,9 @@ void main()
 		break;
 	case 2: // normals
 		oColor = normals;
+		break;
+	case 3: // position
+		oColor = position;
 		break;
 	default: 
 		break;
@@ -134,6 +139,7 @@ layout(binding = 0, std140) uniform GlobalParams
 
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormal;
+layout(location = 2) out vec4 oPosition;
 
 void main()
 {
@@ -150,6 +156,7 @@ void main()
 
 	oColor = texture(uTexture, vTexCoord);
 	oNormal = vec4(vNormal, 1.0);
+	oPosition = vec4(vPosition, 1.0);
 
 }
 

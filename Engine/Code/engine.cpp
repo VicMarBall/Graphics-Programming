@@ -236,6 +236,17 @@ void CreateFrameBuffers(App* app)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	// position
+	glGenTextures(1, &app->positionAttachmentHandle);
+	glBindTexture(GL_TEXTURE_2D, app->positionAttachmentHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	// depth
 	glGenTextures(1, &app->depthAttachmentHandle);
 	glBindTexture(GL_TEXTURE_2D, app->depthAttachmentHandle);
@@ -253,9 +264,10 @@ void CreateFrameBuffers(App* app)
 	glBindFramebuffer(GL_FRAMEBUFFER, app->framebufferHandle);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->normalAttachmentHandle, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, app->positionAttachmentHandle, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
 
-	GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 
 	GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE) 
@@ -412,6 +424,7 @@ void Init(App* app)
 		app->programCurrentFramebufferLocation = glGetUniformLocation(texturedGeometryProgram.handle, "usedFramebuffer");
 		app->programUniformTextureAlbedo = glGetUniformLocation(texturedGeometryProgram.handle, "uAlbedo");
 		app->programUniformTextureNormals = glGetUniformLocation(texturedGeometryProgram.handle, "uNormals");
+		app->programUniformTexturePosition = glGetUniformLocation(texturedGeometryProgram.handle, "uPosition");
 
 		app->diceTexIdx = LoadTexture2D(app, "dice.png");
 		app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
@@ -502,6 +515,7 @@ void Gui(App* app)
 			if (ImGui::MenuItem("Final")) { app->framebufferToDisplay = FramebufferType::FINAL; }
 			if (ImGui::MenuItem("Albedo")) { app->framebufferToDisplay = FramebufferType::ALBEDO; }
 			if (ImGui::MenuItem("Normals")) { app->framebufferToDisplay = FramebufferType::NORMAL; }
+			if (ImGui::MenuItem("Position")) { app->framebufferToDisplay = FramebufferType::POSITION; }
 
 			ImGui::EndMenu();
 		}
@@ -671,15 +685,24 @@ void Render(App* app)
 
 	GLuint textureHandle;
 
+	// albedo
 	glUniform1i(app->programUniformTextureAlbedo, 0);
 	glActiveTexture(GL_TEXTURE0);
 	textureHandle = app->colorAttachmentHandle;
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
+	// normals
 	glUniform1i(app->programUniformTextureNormals, 1);
 	glActiveTexture(GL_TEXTURE1);
 	textureHandle = app->normalAttachmentHandle;
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+	// position
+	glUniform1i(app->programUniformTexturePosition, 2);
+	glActiveTexture(GL_TEXTURE2);
+	textureHandle = app->positionAttachmentHandle;
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
+
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
