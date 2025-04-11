@@ -30,6 +30,8 @@ void main()
 
 in vec2 vTexCoord;
 
+uniform unsigned int usedFramebuffer;
+
 uniform sampler2D uAlbedo;
 uniform sampler2D uNormals;
 
@@ -44,11 +46,12 @@ layout(binding = 0, std140) uniform GlobalParams
 
 void main()
 {
+
 	vec4 baseColor = texture(uAlbedo, vTexCoord);
 	vec4 normals = texture(uNormals, vTexCoord);
 
 	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);
-	
+
 	for (int i = 0; i < uLightCount; ++i)
 	{
 		switch (uLight[i].type)
@@ -62,8 +65,21 @@ void main()
 			break;
 		}
 	}
-	
-	oColor = baseColor * vec4(lightColor, 1.0f);
+
+	switch (usedFramebuffer)
+	{
+	case 0: // final
+		oColor = baseColor * vec4(lightColor, 1.0f);
+		break;
+	case 1: // albedo
+		oColor = baseColor;
+		break;
+	case 2: // normals
+		oColor = normals;
+		break;
+	default: 
+		break;
+	}
 }
 
 #endif

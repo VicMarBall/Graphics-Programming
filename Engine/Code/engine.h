@@ -56,6 +56,7 @@ struct App
 	GLuint embeddedElements;
 
 	// Location of the texture uniform in the textured quad shader
+	GLuint programCurrentFramebufferLocation;
 	GLuint programUniformTextureAlbedo;
 	GLuint programUniformTextureNormals;
 	GLuint texturedMeshProgram_uTexture;

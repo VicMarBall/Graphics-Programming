@@ -409,6 +409,7 @@ void Init(App* app)
 
 		app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
 		Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
+		app->programCurrentFramebufferLocation = glGetUniformLocation(texturedGeometryProgram.handle, "usedFramebuffer");
 		app->programUniformTextureAlbedo = glGetUniformLocation(texturedGeometryProgram.handle, "uAlbedo");
 		app->programUniformTextureNormals = glGetUniformLocation(texturedGeometryProgram.handle, "uNormals");
 
@@ -666,39 +667,19 @@ void Render(App* app)
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glUniform1ui(app->programCurrentFramebufferLocation, app->framebufferToDisplay);
+
 	GLuint textureHandle;
 
-	switch (app->framebufferToDisplay)
-	{
-	case (FramebufferType::FINAL):
-		glUniform1i(app->programUniformTextureAlbedo, 0);
-		glActiveTexture(GL_TEXTURE0);
-		textureHandle = app->colorAttachmentHandle;
-		glBindTexture(GL_TEXTURE_2D, textureHandle);
+	glUniform1i(app->programUniformTextureAlbedo, 0);
+	glActiveTexture(GL_TEXTURE0);
+	textureHandle = app->colorAttachmentHandle;
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
-		glUniform1i(app->programUniformTextureNormals, 1);
-		glActiveTexture(GL_TEXTURE1);
-		textureHandle = app->normalAttachmentHandle;
-		glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-		break;
-	case (FramebufferType::ALBEDO):
-		glUniform1i(app->programUniformTextureAlbedo, 0);
-		glActiveTexture(GL_TEXTURE0);
-		textureHandle = app->colorAttachmentHandle;
-		glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-		break;
-	case (FramebufferType::NORMAL):
-		glUniform1i(app->programUniformTextureNormals, 1);
-		glActiveTexture(GL_TEXTURE1);
-		textureHandle = app->normalAttachmentHandle;
-		glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-		break;
-	default:
-		break;
-	}
+	glUniform1i(app->programUniformTextureNormals, 1);
+	glActiveTexture(GL_TEXTURE1);
+	textureHandle = app->normalAttachmentHandle;
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
