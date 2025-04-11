@@ -530,6 +530,24 @@ void Gui(App* app)
 void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
+	float cameraSpeed = 0.1f;
+	// camera translation
+	if (app->input.keys[K_W]) { app->scene.camera.translate(app->scene.camera.getForward() * cameraSpeed); }
+	if (app->input.keys[K_A]) { app->scene.camera.translate(app->scene.camera.getRight() * cameraSpeed); }
+	if (app->input.keys[K_S]) { app->scene.camera.translate(-app->scene.camera.getForward() * cameraSpeed); }
+	if (app->input.keys[K_D]) { app->scene.camera.translate(-app->scene.camera.getRight() * cameraSpeed); }
+	if (app->input.keys[K_SPACE]) { app->scene.camera.translate(app->scene.camera.getUp() * cameraSpeed); }
+
+	// camera rotation
+	{
+		float cameraRotationSpeed = 0.1f;
+		if (app->input.mouseButtons[RIGHT]) {
+			app->scene.camera.rotate(cameraRotationSpeed * app->input.mouseDelta.x, vec3(0.0f, 1.0f, 0.0f));
+			app->scene.camera.rotate(cameraRotationSpeed * -app->input.mouseDelta.y, vec3(1.0f, 0.0f, 0.0f));
+		}
+	}
+
+
 
 	// when minimizing the window, displaySize.y == 0 -> displaySize.x/0 -> error
 	if (app->displaySize.y > 0) {
