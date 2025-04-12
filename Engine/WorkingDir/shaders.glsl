@@ -10,7 +10,7 @@ struct Light
 	vec3 position;
 };
 
-#ifdef TEXTURED_GEOMETRY
+#ifdef SCREEN_QUAD
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 

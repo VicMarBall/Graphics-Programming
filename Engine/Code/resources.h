@@ -24,13 +24,6 @@ struct Texture
 	std::string filepath;
 };
 
-enum Mode
-{
-	Mode_TexturedQuad,
-	Mode_Count,
-	Mode_TexturedMesh
-};
-
 struct VertexV3V2
 {
 	glm::vec3 pos;

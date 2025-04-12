@@ -371,9 +371,7 @@ void Init(App* app)
 	// - programs (and retrieve uniform indices)
 	// - textures
 
-	app->mode = Mode_TexturedMesh;
-
-	// quad
+	// screen quad
 	{
 		float vertices[] =
 		{
@@ -419,18 +417,12 @@ void Init(App* app)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
 		glBindVertexArray(0);
 
-		app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
-		Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
+		app->screenQuadProgramIdx = LoadProgram(app, "shaders.glsl", "SCREEN_QUAD");
+		Program& texturedGeometryProgram = app->programs[app->screenQuadProgramIdx];
 		app->programCurrentFramebufferLocation = glGetUniformLocation(texturedGeometryProgram.handle, "usedFramebuffer");
 		app->programUniformTextureAlbedo = glGetUniformLocation(texturedGeometryProgram.handle, "uAlbedo");
 		app->programUniformTextureNormals = glGetUniformLocation(texturedGeometryProgram.handle, "uNormals");
 		app->programUniformTexturePosition = glGetUniformLocation(texturedGeometryProgram.handle, "uPosition");
-
-		app->diceTexIdx = LoadTexture2D(app, "dice.png");
-		app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
-		app->blackTexIdx = LoadTexture2D(app, "color_black.png");
-		app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
-		app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 	}
 
 	// mesh
@@ -614,82 +606,50 @@ void Render(App* app)
 
 	glEnable(GL_DEPTH_TEST);
 
-	switch (app->mode)
+	
+	// render meshes
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
+
+	for (const GameObject& gameObject : app->scene.gameObjects)
 	{
-		case Mode_TexturedQuad:
-		{
-			// TODO: Draw your textured quad here!
-			// - clear the framebuffer
-			// - set the viewport
-			// - set the blending state
-			// - bind the texture into unit 0
-			// - bind the program 
-			//   (...and make its texture sample from unit 0)
-			// - bind the vao
-			// - glDrawElements() !!!
+		// set the block of the uniform
+		u32 blockOffset = gameObject.localUniformBufferHead;
+		u32 blockSize = gameObject.localUniformBufferSize;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
 
-			Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
-			glUseProgram(programTexturedGeometry.handle);
-			glBindVertexArray(app->quadVAO);
+		// use the program
+		Program& texturedMeshProgram = app->programs[gameObject.programID];
+		glUseProgram(texturedMeshProgram.handle);
 
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		// draw the mesh
+		Model& model = app->models[gameObject.modelID];
+		Mesh& mesh = app->meshes[model.meshIdx];
 
-			glUniform1i(app->programUniformTextureAlbedo, 0);
+		for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+			glBindVertexArray(vao);
+
+			u32 submeshMaterialIdx = model.materialIdx[i];
+			Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
 			glActiveTexture(GL_TEXTURE0);
-			GLuint textureHandle = app->textures[app->diceTexIdx].handle;
-			glBindTexture(GL_TEXTURE_2D, textureHandle);
+			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+			glUniform1i(app->texturedMeshProgram_uTexture, 0);
 
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-			
-		break;
+			Submesh& submesh = mesh.submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 		}
-		case Mode_TexturedMesh:
-		{
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
-
-			for (const GameObject& gameObject : app->scene.gameObjects)
-			{
-				// set the block of the uniform
-				u32 blockOffset = gameObject.localUniformBufferHead;
-				u32 blockSize = gameObject.localUniformBufferSize;
-				glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
-
-				// use the program
-				Program& texturedMeshProgram = app->programs[gameObject.programID];
-				glUseProgram(texturedMeshProgram.handle);
-
-				// draw the mesh
-				Model& model = app->models[gameObject.modelID];
-				Mesh& mesh = app->meshes[model.meshIdx];
-
-				for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
-					GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
-					glBindVertexArray(vao);
-
-					u32 submeshMaterialIdx = model.materialIdx[i];
-					Material& submeshMaterial = app->materials[submeshMaterialIdx];
-
-					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-					glUniform1i(app->texturedMeshProgram_uTexture, 0);
-
-					Submesh& submesh = mesh.submeshes[i];
-					glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-				}
-			}
-			break;
-		}
-		default:;
 	}
+	
+	
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// render plane on the viewport to put the texture form the framebuffer
-	Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
+	Program& programTexturedGeometry = app->programs[app->screenQuadProgramIdx];
 	glUseProgram(programTexturedGeometry.handle);
 	glBindVertexArray(app->quadVAO);
 

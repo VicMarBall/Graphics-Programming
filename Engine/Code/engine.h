@@ -35,22 +35,12 @@ struct App
 	ivec2 displaySize;
 
 	// program indices
-	u32 texturedGeometryProgramIdx;
-
-	// texture indices
-	u32 diceTexIdx;
-	u32 whiteTexIdx;
-	u32 blackTexIdx;
-	u32 normalTexIdx;
-	u32 magentaTexIdx;
+	u32 screenQuadProgramIdx;
 
 	// scene
 	Scene scene;
 	
 	int uniformBlockAlignment;
-
-	// Mode
-	Mode mode;
 
 	// Embedded geometry (in-editor simple meshes such as
 	// a screen filling quad, a cube, a sphere...)
