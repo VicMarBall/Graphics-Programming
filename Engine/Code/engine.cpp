@@ -362,7 +362,7 @@ void Init(App* app)
 
 	CreateFrameBuffers(app);
 
-	app->scene.camera.translate(vec3(0.0f, 0.0f, -10.0f));
+	app->scene.camera.transform.translate(vec3(0.0f, 0.0f, -10.0f));
 
 	// TODO: Initialize your resources here!
 	// - vertex buffers
@@ -452,7 +452,7 @@ void Init(App* app)
 		gameObject2.modelID = modelID;
 		gameObject2.programID = programID;
 
-		gameObject2.translate(vec3(5.0f, 0.0f, 0.0f));
+		gameObject2.transform.translate(vec3(5.0f, 0.0f, 0.0f));
 	}
 
 	int maxUniformBufferSize;
@@ -532,18 +532,17 @@ void Update(App* app)
 	// You can handle app->input keyboard/mouse here
 	float cameraSpeed = 0.1f;
 	// camera translation
-	if (app->input.keys[K_W]) { app->scene.camera.translate(app->scene.camera.getForward() * cameraSpeed); }
-	if (app->input.keys[K_A]) { app->scene.camera.translate(app->scene.camera.getRight() * cameraSpeed); }
-	if (app->input.keys[K_S]) { app->scene.camera.translate(-app->scene.camera.getForward() * cameraSpeed); }
-	if (app->input.keys[K_D]) { app->scene.camera.translate(-app->scene.camera.getRight() * cameraSpeed); }
-	if (app->input.keys[K_SPACE]) { app->scene.camera.translate(app->scene.camera.getUp() * cameraSpeed); }
+	if (app->input.keys[K_W]) { app->scene.camera.transform.translate(vec3( 0.0f, 0.0f,  1.0f) * cameraSpeed); }
+	if (app->input.keys[K_A]) { app->scene.camera.transform.translate(vec3( 1.0f, 0.0f,  0.0f) * cameraSpeed); }
+	if (app->input.keys[K_S]) { app->scene.camera.transform.translate(vec3( 0.0f, 0.0f, -1.0f) * cameraSpeed); }
+	if (app->input.keys[K_D]) { app->scene.camera.transform.translate(vec3(-1.0f, 0.0f,  0.0f) * cameraSpeed); }
 
 	// camera rotation
 	{
 		float cameraRotationSpeed = 0.1f;
 		if (app->input.mouseButtons[RIGHT]) {
-			app->scene.camera.rotate(cameraRotationSpeed * app->input.mouseDelta.x, vec3(0.0f, 1.0f, 0.0f));
-			app->scene.camera.rotate(cameraRotationSpeed * -app->input.mouseDelta.y, vec3(1.0f, 0.0f, 0.0f));
+			app->scene.camera.transform.rotate(cameraRotationSpeed * -app->input.mouseDelta.x, vec3(0.0f, 1.0f, 0.0f), GLOBAL);
+			app->scene.camera.transform.rotate(cameraRotationSpeed * app->input.mouseDelta.y, vec3(1.0f, 0.0f, 0.0f));
 		}
 	}
 
@@ -553,18 +552,18 @@ void Update(App* app)
 	if (app->displaySize.y > 0) {
 		float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
 		app->projection = glm::perspective(glm::radians(60.0f), aspectRatio, app->scene.camera.zNear, app->scene.camera.zFar);
-		app->view = glm::lookAt(app->scene.camera.getPosition(), app->scene.camera.getPosition() + app->scene.camera.getForward(), app->scene.camera.getUp());
+		app->view = glm::lookAt(app->scene.camera.transform.getPosition(), app->scene.camera.transform.getPosition() + app->scene.camera.transform.getForward(), app->scene.camera.transform.getUp());
 	}
 
 	GameObject& gameObject = app->scene.gameObjects.back();
-	gameObject.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
+	gameObject.transform.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
 
 	// global uniforms
 	app->globalUniformHead = app->uniformsBuffer.head;
 
 	MapBuffer(app->uniformsBuffer, GL_WRITE_ONLY);
 
-	PushVec3(app->uniformsBuffer, app->scene.camera.getPosition());
+	PushVec3(app->uniformsBuffer, app->scene.camera.transform.getPosition());
 	PushUInt(app->uniformsBuffer, app->scene.lights.size());
 
 	for (u32 i = 0; i < app->scene.lights.size(); ++i) 
@@ -586,10 +585,10 @@ void Update(App* app)
 	{
 		AlignHead(app->uniformsBuffer, app->uniformBlockAlignment);
 
-		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.getTransform();
+		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.transform.getTransform();
 
 		gameObject.localUniformBufferHead = app->uniformsBuffer.head;
-		PushMat4(app->uniformsBuffer, gameObject.getTransform());
+		PushMat4(app->uniformsBuffer, gameObject.transform.getTransform());
 		PushMat4(app->uniformsBuffer, worldViewProjectionMatrix);
 		gameObject.localUniformBufferSize = app->uniformsBuffer.head - gameObject.localUniformBufferHead;
 	}

@@ -3,11 +3,16 @@
 #include "platform.h"
 #include <vector>
 
-class Camera 
+enum TransformOrientation {
+	LOCAL,
+	GLOBAL
+};
+
+class Transform 
 {
 public:
-	Camera() { _transform = glm::identity<glm::mat4>(); }
-	Camera(glm::vec3 position) 
+	Transform() { _transform = glm::identity<glm::mat4>(); }
+	Transform(glm::vec3 position)
 	{
 		_position = position;
 	}
@@ -20,11 +25,42 @@ public:
 
 	glm::vec3 getPosition() const { return _position; }
 
-	void translate(glm::vec3 translation) { _transform = glm::translate(_transform, translation); }
-	void rotate(float angle, glm::vec3 axis) { _transform = _transform * glm::rotate(glm::radians(angle), axis); }
-	void scale(glm::vec3 scale) { _transform = glm::scale(_transform, scale); }
-
-	float zNear = 0.01f, zFar = 1000.0f;
+	void translate(glm::vec3 translation, TransformOrientation orientation = LOCAL)
+	{
+		switch (orientation)
+		{
+		case LOCAL:
+			_transform = glm::translate(_transform, translation);
+			break;
+		case GLOBAL:
+			_position += translation;
+			break;
+		}
+	}
+	void rotate(float degrees, glm::vec3 axis, TransformOrientation orientation = LOCAL)
+	{
+		switch (orientation)
+		{
+		case LOCAL:
+			_transform = glm::rotate(_transform, glm::radians(degrees), axis);
+			break;
+		case GLOBAL:
+			_transform = glm::rotate(_transform, glm::radians(degrees), axis * (glm::mat3)_transform);
+			break;
+		}
+	}
+	void scale(glm::vec3 scale, TransformOrientation orientation = LOCAL)
+	{
+		switch (orientation)
+		{
+		case LOCAL:
+			_transform = glm::scale(_transform, scale);
+			break;
+		case GLOBAL:
+			_transform = glm::scale(_transform, scale);
+			break;
+		}
+	}
 
 private:
 	union {
@@ -38,13 +74,27 @@ private:
 	};
 };
 
+class Camera 
+{
+public:
+	Camera() { }
+	Camera(glm::vec3 position) 
+	{
+		transform = Transform(position);
+	}
+
+	Transform transform;
+
+	float zNear = 0.01f, zFar = 1000.0f;
+};
+
 class GameObject 
 {
 public:
-	GameObject() { _transform = glm::identity<glm::mat4>(); }
+	GameObject() { }
 	GameObject(glm::vec3 position)
 	{
-		_position = position;
+		transform = Transform(position);
 	}
 
 	// mesh
@@ -52,32 +102,10 @@ public:
 	// shader
 	u32 programID;
 
-	glm::mat4 getTransform() const { return _transform; }
-
-	glm::vec3 getRight() const { return _right; }
-	glm::vec3 getUp() const { return _up; }
-	glm::vec3 getForward() const { return _forward; }
-
-	glm::vec3 getPosition() const { return _position; }
-
-	void translate(glm::vec3 translation) { _transform = glm::translate(_transform, translation); }
-	void rotate(float angle, glm::vec3 axis) { _transform = _transform * glm::rotate(glm::radians(angle), axis); }
-	void scale(glm::vec3 scale) { _transform = glm::scale(_transform, scale); }
+	Transform transform;
 
 	u32 localUniformBufferHead;
 	u32 localUniformBufferSize;
-private:
-	// model matrix / world matrix
-	union {
-		glm::mat4 _transform;
-		struct {
-			glm::vec3 _right;	float _paddingX;
-			glm::vec3 _up;		float _paddingY;
-			glm::vec3 _forward;	float _paddingZ;
-			glm::vec3 _position;float _paddingW;
-		};
-	};
-
 };
 
 enum LightType
