@@ -59,8 +59,8 @@ void main()
 {
 
 	vec4 baseColor = texture(uAlbedo, vTexCoord);
-	vec4 normals = texture(uNormals, vTexCoord);
-	vec4 position = texture(uPosition, vTexCoord);
+	vec3 normals = texture(uNormals, vTexCoord).xyz;
+	vec3 position = texture(uPosition, vTexCoord).xyz;
 	float depth = linearizeDepth(texture(uDepth, vTexCoord).r) / far;
 
 	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);	
@@ -69,13 +69,13 @@ void main()
 		switch (uLight[i].type)
 		{
 		case 0: // point light
-			float distanceToPoint = distance(uLight[i].position, position.xyz);
-			vec3 directionVector = position.xyz - uLight[i].position;
+			float distanceToPoint = distance(uLight[i].position, position);
+			vec3 directionVector = position - uLight[i].position;
 
-			lightColor += max(0.0f, -dot(normals.xyz, normalize(directionVector))) * uLight[i].color / distanceToPoint;
+			lightColor += max(0.0f, -dot(normals, normalize(directionVector))) * uLight[i].color / distanceToPoint;
 			break;
 		case 1: // directional
-			lightColor += max(0.0f, -dot(normals.xyz, normalize(uLight[i].direction))) * uLight[i].color;
+			lightColor += max(0.0f, -dot(normals, normalize(uLight[i].direction))) * uLight[i].color;
 			break;
 		default:
 			break;
@@ -91,10 +91,10 @@ void main()
 		oColor = baseColor;
 		break;
 	case 2: // normals
-		oColor = normals;
+		oColor = vec4(normals, 1.0f);
 		break;
 	case 3: // position
-		oColor = position;
+		oColor = vec4(position, 1.0f);
 		break;
 	case 4: // lights
 		oColor = vec4(lightColor, 1.0f);
