@@ -123,7 +123,7 @@ void main()
 	vTexCoord = aTexCoord;
 
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	vNormal = normalize(vec3(uWorldMatrix * vec4(aNormal, 0.0)));
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }

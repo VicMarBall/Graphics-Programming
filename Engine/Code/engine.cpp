@@ -445,6 +445,18 @@ void Init(App* app)
 		gameObject2.programID = programID;
 
 		gameObject2.transform.translate(vec3(5.0f, 0.0f, 0.0f));
+
+		app->scene.gameObjects.push_back(GameObject());
+		GameObject& bakerHouse = app->scene.gameObjects.back();
+
+		// geometry
+		u32 bakerHouseModelID = LoadModel(app, "Baker House/BakerHouse.fbx");
+		bakerHouse.modelID = bakerHouseModelID;
+
+		bakerHouse.programID = programID;
+
+		bakerHouse.transform.translate(vec3(-5.0f, 0.0f, 0.0f));
+		bakerHouse.transform.scale(vec3(0.01f, 0.01f, 0.01f));
 	}
 
 	int maxUniformBufferSize;
