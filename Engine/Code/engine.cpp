@@ -423,6 +423,7 @@ void Init(App* app)
 		app->programUniformTextureAlbedo = glGetUniformLocation(texturedGeometryProgram.handle, "uAlbedo");
 		app->programUniformTextureNormals = glGetUniformLocation(texturedGeometryProgram.handle, "uNormals");
 		app->programUniformTexturePosition = glGetUniformLocation(texturedGeometryProgram.handle, "uPosition");
+		app->programUniformTextureDepth = glGetUniformLocation(texturedGeometryProgram.handle, "uDepth");
 	}
 
 	// mesh
@@ -521,6 +522,7 @@ void Gui(App* app)
 			if (ImGui::MenuItem("Normals")) { app->framebufferToDisplay = FramebufferType::NORMAL; }
 			if (ImGui::MenuItem("Position")) { app->framebufferToDisplay = FramebufferType::POSITION; }
 			if (ImGui::MenuItem("Lights")) { app->framebufferToDisplay = FramebufferType::LIGHTS; }
+			if (ImGui::MenuItem("Depth")) { app->framebufferToDisplay = FramebufferType::DEPTH; }
 
 			ImGui::EndMenu();
 		}
@@ -693,6 +695,11 @@ void Render(App* app)
 	textureHandle = app->positionAttachmentHandle;
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
+	// depth
+	glUniform1i(app->programUniformTextureDepth, 3);
+	glActiveTexture(GL_TEXTURE3);
+	textureHandle = app->depthAttachmentHandle;
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 

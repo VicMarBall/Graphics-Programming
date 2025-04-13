@@ -35,6 +35,7 @@ uniform unsigned int usedFramebuffer;
 uniform sampler2D uAlbedo;
 uniform sampler2D uNormals;
 uniform sampler2D uPosition;
+uniform sampler2D uDepth;
 
 layout(location = 0) out vec4 oColor;
 
@@ -45,12 +46,22 @@ layout(binding = 0, std140) uniform GlobalParams
 	Light uLight[16];
 };
 
+float near = 0.1f;
+float far = 100.0f;
+
+float linearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main()
 {
 
 	vec4 baseColor = texture(uAlbedo, vTexCoord);
 	vec4 normals = texture(uNormals, vTexCoord);
 	vec4 position = texture(uPosition, vTexCoord);
+	float depth = linearizeDepth(texture(uDepth, vTexCoord).r) / far;
 
 	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);	
 	for (int i = 0; i < uLightCount; ++i)
@@ -88,6 +99,8 @@ void main()
 	case 4: // lights
 		oColor = vec4(lightColor, 1.0f);
 		break;
+	case 5: // depth
+		oColor = vec4(depth, depth, depth, 1.0f);
 	default: 
 		break;
 	}
