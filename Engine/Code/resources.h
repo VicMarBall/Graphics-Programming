@@ -30,6 +30,12 @@ struct VertexV3V2
 	glm::vec2 uv;
 };
 
+struct VertexV3V3
+{
+	glm::vec3 pos;
+	glm::vec3 normal;
+};
+
 struct VertexBufferAttribute
 {
 	u8 location;

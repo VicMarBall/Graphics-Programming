@@ -426,6 +426,319 @@ void Init(App* app)
 		app->programUniformTextureDepth = glGetUniformLocation(texturedGeometryProgram.handle, "uDepth");
 	}
 
+	// load basic shapes
+	{
+		app->basicShapesProgramIdx = LoadProgram(app, "shaders.glsl", "BASIC_SHAPE");
+
+		// plane
+		{
+
+			VertexBufferLayout vertexBufferLayout;
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 1, 3, 3 * sizeof(float) });	// normals
+			vertexBufferLayout.stride = 6 * sizeof(float);
+
+			app->meshes.push_back(Mesh{});
+			Mesh& mesh = app->meshes.back();
+			u32 meshIdx = (u32)app->meshes.size() - 1u;
+
+			app->models.push_back(Model{});
+			Model& model = app->models.back();
+			model.meshIdx = meshIdx;
+			u32 modelIdx = (u32)app->models.size() - 1u;
+
+			// create vertices
+			{
+				std::vector<float> vertices;
+				std::vector<u32> indices;
+
+				// process vertices (CHANGE MANUALLY)
+				vertices.push_back(-1);	vertices.push_back(0); vertices.push_back(-1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
+				vertices.push_back(-1);	vertices.push_back(0); vertices.push_back(1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
+				vertices.push_back(1);	vertices.push_back(0); vertices.push_back(1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
+				vertices.push_back(1);	vertices.push_back(0); vertices.push_back(-1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
+
+
+				// process indices (CHANGE MANUALLY)
+				indices.push_back(0);
+				indices.push_back(1);
+				indices.push_back(2);
+				indices.push_back(0);
+				indices.push_back(2);
+				indices.push_back(3);
+
+				app->materials.push_back(Material());
+				Material& material = app->materials.back();
+				model.materialIdx.push_back((u32)app->materials.size() - 1u);
+
+				// add the submesh into the mesh
+				Submesh submesh = {};
+				submesh.vertexBufferLayout = vertexBufferLayout;
+				submesh.vertices.swap(vertices);
+				submesh.indices.swap(indices);
+				mesh.submeshes.push_back(submesh);
+			}
+
+			u32 vertexBufferSize = 0;
+			u32 indexBufferSize = 0;
+
+			// change for specific mesh
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+			{
+				vertexBufferSize += mesh.submeshes[i].vertices.size() * sizeof(float);
+				indexBufferSize += mesh.submeshes[i].indices.size() * sizeof(u32);
+			}
+
+			glGenBuffers(1, &mesh.vertexBufferHandle);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBufferHandle);
+			glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, NULL, GL_STATIC_DRAW);
+
+			glGenBuffers(1, &mesh.indexBufferHandle);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, NULL, GL_STATIC_DRAW);
+
+			u32 indicesOffset = 0;
+			u32 verticesOffset = 0;
+
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+			{
+				const void* verticesData = mesh.submeshes[i].vertices.data();
+				const u32   verticesSize = mesh.submeshes[i].vertices.size() * sizeof(float);
+				glBufferSubData(GL_ARRAY_BUFFER, verticesOffset, verticesSize, verticesData);
+				mesh.submeshes[i].vertexOffset = verticesOffset;
+				verticesOffset += verticesSize;
+
+				const void* indicesData = mesh.submeshes[i].indices.data();
+				const u32   indicesSize = mesh.submeshes[i].indices.size() * sizeof(u32);
+				glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indicesOffset, indicesSize, indicesData);
+				mesh.submeshes[i].indexOffset = indicesOffset;
+				indicesOffset += indicesSize;
+			}
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			app->planeIdx = modelIdx;
+		}
+
+		// cube
+		{
+			VertexBufferLayout vertexBufferLayout;
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 1, 3, 3 * sizeof(float) });	// normals
+			vertexBufferLayout.stride = 6 * sizeof(float);
+
+			app->meshes.push_back(Mesh{});
+			Mesh& mesh = app->meshes.back();
+			u32 meshIdx = (u32)app->meshes.size() - 1u;
+
+			app->models.push_back(Model{});
+			Model& model = app->models.back();
+			model.meshIdx = meshIdx;
+			u32 modelIdx = (u32)app->models.size() - 1u;
+
+			{
+				const float d = sqrtf(3);
+
+				std::vector<float> vertices;
+				std::vector<u32> indices;
+
+				// process vertices (CHANGE MANUALLY)
+				vertices.push_back(1);	vertices.push_back(1);	vertices.push_back(1);	vertices.push_back(d);	vertices.push_back(d);	vertices.push_back(d);
+				vertices.push_back(1);	vertices.push_back(1);	vertices.push_back(-1);	vertices.push_back(d);	vertices.push_back(d);	vertices.push_back(-d);
+				vertices.push_back(-1);	vertices.push_back(1);	vertices.push_back(1);	vertices.push_back(-d);	vertices.push_back(d);	vertices.push_back(d);
+				vertices.push_back(-1);	vertices.push_back(1);	vertices.push_back(-1);	vertices.push_back(-d);	vertices.push_back(d);	vertices.push_back(-d);
+				vertices.push_back(1);	vertices.push_back(-1);	vertices.push_back(1);	vertices.push_back(d);	vertices.push_back(-d);	vertices.push_back(d);
+				vertices.push_back(1);	vertices.push_back(-1);	vertices.push_back(-1);	vertices.push_back(d);	vertices.push_back(-d);	vertices.push_back(-d);
+				vertices.push_back(-1);	vertices.push_back(-1);	vertices.push_back(1);	vertices.push_back(-d);	vertices.push_back(-d);	vertices.push_back(d);
+				vertices.push_back(-1);	vertices.push_back(-1);	vertices.push_back(-1);	vertices.push_back(-d);	vertices.push_back(-d);	vertices.push_back(-d);
+
+				// process indices (CHANGE MANUALLY)
+				indices.push_back(0);	indices.push_back(1);	indices.push_back(2);
+				indices.push_back(3);	indices.push_back(1);	indices.push_back(2);
+				
+				indices.push_back(0);	indices.push_back(1);	indices.push_back(4);
+				indices.push_back(5);	indices.push_back(1);	indices.push_back(4);
+				
+				indices.push_back(3);	indices.push_back(2);	indices.push_back(7);
+				indices.push_back(6);	indices.push_back(2);	indices.push_back(7);
+				
+				indices.push_back(1);	indices.push_back(3);	indices.push_back(5);
+				indices.push_back(7);	indices.push_back(3);	indices.push_back(5);
+				
+				indices.push_back(0);	indices.push_back(2);	indices.push_back(4);
+				indices.push_back(6);	indices.push_back(2);	indices.push_back(4);
+				
+				indices.push_back(4);	indices.push_back(5);	indices.push_back(6);
+				indices.push_back(7);	indices.push_back(5);	indices.push_back(6);
+
+
+				app->materials.push_back(Material());
+				Material& material = app->materials.back();
+				model.materialIdx.push_back((u32)app->materials.size() - 1u);
+
+				// add the submesh into the mesh
+				Submesh submesh = {};
+				submesh.vertexBufferLayout = vertexBufferLayout;
+				submesh.vertices.swap(vertices);
+				submesh.indices.swap(indices);
+				mesh.submeshes.push_back(submesh);
+			}
+
+			u32 vertexBufferSize = 0;
+			u32 indexBufferSize = 0;
+
+			// change for specific mesh
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+			{
+				vertexBufferSize += mesh.submeshes[i].vertices.size() * sizeof(float);
+				indexBufferSize += mesh.submeshes[i].indices.size() * sizeof(u32);
+			}
+
+			glGenBuffers(1, &mesh.vertexBufferHandle);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBufferHandle);
+			glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, NULL, GL_STATIC_DRAW);
+
+			glGenBuffers(1, &mesh.indexBufferHandle);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, NULL, GL_STATIC_DRAW);
+
+			u32 indicesOffset = 0;
+			u32 verticesOffset = 0;
+
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+			{
+				const void* verticesData = mesh.submeshes[i].vertices.data();
+				const u32   verticesSize = mesh.submeshes[i].vertices.size() * sizeof(float);
+				glBufferSubData(GL_ARRAY_BUFFER, verticesOffset, verticesSize, verticesData);
+				mesh.submeshes[i].vertexOffset = verticesOffset;
+				verticesOffset += verticesSize;
+
+				const void* indicesData = mesh.submeshes[i].indices.data();
+				const u32   indicesSize = mesh.submeshes[i].indices.size() * sizeof(u32);
+				glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indicesOffset, indicesSize, indicesData);
+				mesh.submeshes[i].indexOffset = indicesOffset;
+				indicesOffset += indicesSize;
+			}
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			app->cubeIdx = modelIdx;
+		}
+
+		// sphere
+		{
+			VertexBufferLayout vertexBufferLayout;
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0, 3, 0 });					// 3D positions
+			vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 1, 3, 3 * sizeof(float) });	// normals
+			vertexBufferLayout.stride = 6 * sizeof(float);
+
+			app->meshes.push_back(Mesh{});
+			Mesh& mesh = app->meshes.back();
+			u32 meshIdx = (u32)app->meshes.size() - 1u;
+
+			app->models.push_back(Model{});
+			Model& model = app->models.back();
+			model.meshIdx = meshIdx;
+			u32 modelIdx = (u32)app->models.size() - 1u;
+
+			{
+				const unsigned int H = 32;
+				const unsigned int V = 16;
+
+				const float pi = glm::pi<float>();
+
+				std::vector<float> vertices;
+				std::vector<u32> indices;
+
+				// process vertices (CHANGE MANUALLY)
+				for (int h = 0; h < H; ++h) {
+					float nh = float(h) / H;
+					float angleh = 2 * pi * nh;
+
+					for (int v = 0; v < V + 1; ++v) {
+						float nv = float(v) / V - 0.5f;
+						float anglev = -pi * nv;
+
+						VertexV3V3 vertex;
+
+						vertices.push_back(sinf(angleh) * cosf(anglev));	// x
+						vertices.push_back(-sinf(anglev));					// y
+						vertices.push_back(cosf(angleh) * cosf(anglev));	// z
+						vertices.push_back(sinf(angleh)* cosf(anglev));		// normal.x == x
+						vertices.push_back(-sinf(anglev));					// normal.y == y
+						vertices.push_back(cosf(angleh)* cosf(anglev));		// normal.z == z
+					}
+				}
+
+				// process indices (CHANGE MANUALLY)
+				for (int h = 0; h < H; ++h) {
+					for (int v = 0; v < V + 1; ++v) {
+						indices.push_back(	(h + 0)			* (V + 1)	+ v);
+						indices.push_back(	((h + 1) % H)	* (V + 1)	+ v);
+						indices.push_back(	((h + 1) % H)	* (V + 1)	+ v+1);
+						indices.push_back(	(h + 0)			* (V + 1)	+ v);
+						indices.push_back(	((h + 1) % H)	* (V + 1)	+ v+1);
+						indices.push_back(	(h + 0)			* (V + 1)	+ v+1);
+					}
+				}
+
+				app->materials.push_back(Material());
+				Material& material = app->materials.back();
+				model.materialIdx.push_back((u32)app->materials.size() - 1u);
+
+				// add the submesh into the mesh
+				Submesh submesh = {};
+				submesh.vertexBufferLayout = vertexBufferLayout;
+				submesh.vertices.swap(vertices);
+				submesh.indices.swap(indices);
+				mesh.submeshes.push_back(submesh);
+			}
+
+			u32 vertexBufferSize = 0;
+			u32 indexBufferSize = 0;
+
+			// change for specific mesh
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+			{
+				vertexBufferSize += mesh.submeshes[i].vertices.size() * sizeof(float);
+				indexBufferSize += mesh.submeshes[i].indices.size() * sizeof(u32);
+			}
+
+			glGenBuffers(1, &mesh.vertexBufferHandle);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBufferHandle);
+			glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, NULL, GL_STATIC_DRAW);
+
+			glGenBuffers(1, &mesh.indexBufferHandle);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, NULL, GL_STATIC_DRAW);
+
+			u32 indicesOffset = 0;
+			u32 verticesOffset = 0;
+
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+			{
+				const void* verticesData = mesh.submeshes[i].vertices.data();
+				const u32   verticesSize = mesh.submeshes[i].vertices.size() * sizeof(float);
+				glBufferSubData(GL_ARRAY_BUFFER, verticesOffset, verticesSize, verticesData);
+				mesh.submeshes[i].vertexOffset = verticesOffset;
+				verticesOffset += verticesSize;
+
+				const void* indicesData = mesh.submeshes[i].indices.data();
+				const u32   indicesSize = mesh.submeshes[i].indices.size() * sizeof(u32);
+				glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indicesOffset, indicesSize, indicesData);
+				mesh.submeshes[i].indexOffset = indicesOffset;
+				indicesOffset += indicesSize;
+			}
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			app->sphereIdx = modelIdx;
+		}
+	}
+
 	// mesh
 	{
 		app->scene.gameObjects.push_back(GameObject());
@@ -526,6 +839,37 @@ void Gui(App* app)
 
 			ImGui::EndMenu();
 		}
+
+		if (ImGui::BeginMenu("Basic Shapes")) {
+
+			if (ImGui::MenuItem("Add Plane")) 
+			{
+				app->scene.gameObjects.push_back(GameObject());
+				GameObject& plane = app->scene.gameObjects.back();
+
+				plane.modelID = app->planeIdx;
+				plane.programID = app->basicShapesProgramIdx;
+			}
+			if (ImGui::MenuItem("Add Cube")) 
+			{
+				app->scene.gameObjects.push_back(GameObject());
+				GameObject& cube = app->scene.gameObjects.back();
+
+				cube.modelID = app->cubeIdx;
+				cube.programID = app->basicShapesProgramIdx;
+			}
+			if (ImGui::MenuItem("Add Sphere")) 
+			{ 
+				app->scene.gameObjects.push_back(GameObject());
+				GameObject& sphere = app->scene.gameObjects.back();
+
+				sphere.modelID = app->sphereIdx;
+				sphere.programID = app->basicShapesProgramIdx;
+			}
+
+			ImGui::EndMenu();
+		}
+
 
 		ImGui::EndMenuBar();
 	}

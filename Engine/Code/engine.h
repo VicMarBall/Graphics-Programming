@@ -59,6 +59,12 @@ struct App
 	// VAO object to link our screen filling quad with our textured quad shader
 	GLuint quadVAO;
 
+	// basic shapes
+	GLuint basicShapesProgramIdx;
+	GLuint planeIdx;
+	GLuint cubeIdx;
+	GLuint sphereIdx;
+
 	// transformation matrices
 	glm::mat4 projection;
 	glm::mat4 view;
