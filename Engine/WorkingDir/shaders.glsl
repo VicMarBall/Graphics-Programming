@@ -43,7 +43,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[256];
 };
 
 float near = 0.1f;
@@ -153,7 +153,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[256];
 };
 
 layout(location = 0) out vec4 oColor;
@@ -217,7 +217,7 @@ layout(binding = 0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[256];
 };
 
 layout(location = 0) out vec4 oColor;

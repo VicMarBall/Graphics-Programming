@@ -791,24 +791,39 @@ void Init(App* app)
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 	
+	// regular lights
+	{
+		Light light1;
+		light1.type = LightType_Point;
+		light1.color = vec3(1.0f, 1.0f, 0.0f);
+		light1.transform.translate(vec3(0.0f, 2.0f, -1.0f), GLOBAL);
+		light1.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+	
+		app->scene.lights.push_back(light1);
+	
+		Light light2;
+		light2.type = LightType_Directional;
+		light2.color = vec3(1.0f, 1.0f, 1.0f);
+		light2.transform.rotate(180.0f, vec3(0, 1, 0), GLOBAL);
+		light2.transform.rotate(-45.0f, vec3(1, 0, 0), GLOBAL);
+		light2.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+	
+		app->scene.lights.push_back(light2);
+	}
 
-	Light light1;
-	light1.type = LightType_Point;
-	light1.color = vec3(1.0f, 1.0f, 0.0f);
-	light1.transform.translate(vec3(0.0f, 2.0f, -1.0f), GLOBAL);
-	light1.transform.scale(vec3(0.2f, 0.2f, 0.2f));
-
-	app->scene.lights.push_back(light1);
-
-	Light light2;
-	light2.type = LightType_Directional;
-	light2.color = vec3(1.0f, 1.0f, 1.0f);
-	light2.transform.rotate(180.0f, vec3(0, 1, 0), GLOBAL);
-	light2.transform.rotate(-45.0f, vec3(1, 0, 0), GLOBAL);
-	light2.transform.scale(vec3(0.2f, 0.2f, 0.2f));
-
-	app->scene.lights.push_back(light2);
-
+	// stress test lights
+	//s{
+	//s	// when trying to reach 256 the uniform buffer overflows
+	//s	for (int i = 0; i < 128; ++i) {
+	//s		Light light;
+	//s		light.type = LightType_Point;
+	//s		light.color = vec3((i % 4) / 3, floorf(i / 4), (i % 16) / 15);
+	//s		light.transform.translate(vec3(i % 4, 0.0f, floorf(i / 4)), GLOBAL);
+	//s		light.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+	//s
+	//s		app->scene.lights.push_back(light);
+	//s	}
+	//s}
 	
 	// for each buffer you need
 
