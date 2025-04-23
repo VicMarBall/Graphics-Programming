@@ -118,8 +118,11 @@ struct Light
 {
 	LightType type;
 	glm::vec3 color;
-	glm::vec3 direction;
-	glm::vec3 position;
+
+	Transform transform;
+
+	u32 localUniformBufferHead;
+	u32 localUniformBufferSize;
 };
 
 class Scene 

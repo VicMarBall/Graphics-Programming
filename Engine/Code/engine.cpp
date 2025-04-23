@@ -795,16 +795,17 @@ void Init(App* app)
 	Light light1;
 	light1.type = LightType_Point;
 	light1.color = vec3(1.0f, 1.0f, 0.0f);
-	light1.direction = vec3(0.0f, -1.0f, 0.0f);
-	light1.position = vec3(0.0f, 2.0f, -1.0f);
+	light1.transform.translate(vec3(0.0f, 2.0f, -1.0f), GLOBAL);
+	light1.transform.scale(vec3(0.2f, 0.2f, 0.2f));
 
 	app->scene.lights.push_back(light1);
 
 	Light light2;
 	light2.type = LightType_Directional;
 	light2.color = vec3(1.0f, 1.0f, 1.0f);
-	light2.direction = vec3(-1.0f, -1.0f, -1.0f);
-	light2.position = vec3(0.0f, 0.0f, 2.0f);
+	light2.transform.rotate(180.0f, vec3(0, 1, 0), GLOBAL);
+	light2.transform.rotate(-45.0f, vec3(1, 0, 0), GLOBAL);
+	light2.transform.scale(vec3(0.2f, 0.2f, 0.2f));
 
 	app->scene.lights.push_back(light2);
 
@@ -938,15 +939,14 @@ void Update(App* app)
 	PushVec3(app->uniformsBuffer, app->scene.camera.transform.getPosition());
 	PushUInt(app->uniformsBuffer, app->scene.lights.size());
 
-	for (u32 i = 0; i < app->scene.lights.size(); ++i) 
+	for (Light& light : app->scene.lights) 
 	{
 		AlignHead(app->uniformsBuffer, sizeof(vec4));
 
-		Light& light = app->scene.lights[i];
 		PushUInt(app->uniformsBuffer, light.type);
 		PushVec3(app->uniformsBuffer, light.color);
-		PushVec3(app->uniformsBuffer, light.direction);
-		PushVec3(app->uniformsBuffer, light.position);
+		PushVec3(app->uniformsBuffer, light.transform.getForward());
+		PushVec3(app->uniformsBuffer, light.transform.getPosition());
 	}
 
 	app->globalUniformSize = app->uniformsBuffer.head - app->globalUniformHead;
@@ -963,6 +963,18 @@ void Update(App* app)
 		PushMat4(app->uniformsBuffer, gameObject.transform.getTransform());
 		PushMat4(app->uniformsBuffer, worldViewProjectionMatrix);
 		gameObject.localUniformBufferSize = app->uniformsBuffer.head - gameObject.localUniformBufferHead;
+	}
+
+	// prepare uniforms for gizmos
+	for (Light& light : app->scene.lights) {
+		AlignHead(app->uniformsBuffer, app->uniformBlockAlignment);
+
+		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * light.transform.getTransform();
+
+		light.localUniformBufferHead = app->uniformsBuffer.head;
+		PushMat4(app->uniformsBuffer, light.transform.getTransform());
+		PushMat4(app->uniformsBuffer, worldViewProjectionMatrix);
+		light.localUniformBufferSize = app->uniformsBuffer.head - light.localUniformBufferHead;
 	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -1067,6 +1079,51 @@ void Render(App* app)
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	// draw gizmos
+	for (const Light& light : app->scene.lights)
+	{
+		// set the block of the uniform
+		u32 blockOffset = light.localUniformBufferHead;
+		u32 blockSize = light.localUniformBufferSize;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
+
+		// use the program
+		Program& meshProgram = app->programs[app->basicShapesProgramIdx];
+		glUseProgram(meshProgram.handle);
+
+		// draw the mesh
+		Model model;
+
+		switch (light.type)
+		{
+		case LightType_Directional:
+			model = app->models[app->planeIdx];
+			break;
+		case LightType_Point:
+			model = app->models[app->sphereIdx];
+			break;
+		default:
+			break;
+		}
+
+		Mesh& mesh = app->meshes[model.meshIdx];
+
+		for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+			GLuint vao = FindVAO(mesh, i, meshProgram);
+			glBindVertexArray(vao);
+
+			u32 submeshMaterialIdx = model.materialIdx[i];
+			Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+
+			Submesh& submesh = mesh.submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+		}
+	}
+
 
 	glBindVertexArray(0);
 	glUseProgram(0);
