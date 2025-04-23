@@ -362,7 +362,8 @@ void Init(App* app)
 
 	CreateFrameBuffers(app);
 
-	app->scene.camera.transform.translate(vec3(0.0f, 0.0f, -10.0f));
+	app->scene.camera.transform.translate(vec3(0.0f, 0.0f, 10.0f));
+	app->scene.camera.transform.rotate(180.0f, vec3(0, 1, 0), GLOBAL);
 
 	// TODO: Initialize your resources here!
 	// - vertex buffers
