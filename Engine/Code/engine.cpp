@@ -773,19 +773,39 @@ void Init(App* app)
 		bakerHouse.transform.scale(vec3(0.01f, 0.01f, 0.01f));
 	}
 
+
+	app->scene.gameObjects.push_back(GameObject());
+	GameObject& plane = app->scene.gameObjects.back();
+
+	plane.transform.scale(vec3(10.0f, 10.0f, 10.0f));
+	plane.transform.translate(vec3(0, -3.5f, 0), GLOBAL);
+
+	plane.modelID = app->planeIdx;
+	plane.programID = app->basicShapesProgramIdx;
+
+
+
 	int maxUniformBufferSize;
 	//int uniformBlockAlignment;
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 	
 
-	Light light;
-	light.type = LightType_Point;
-	light.color = vec3(1.0f, 1.0f, 1.0f);
-	light.direction = vec3(0.0f, -1.0f, 0.0f);
-	light.position = vec3(0.0f, 2.0f, -1.0f);
+	Light light1;
+	light1.type = LightType_Point;
+	light1.color = vec3(1.0f, 1.0f, 0.0f);
+	light1.direction = vec3(0.0f, -1.0f, 0.0f);
+	light1.position = vec3(0.0f, 2.0f, -1.0f);
 
-	app->scene.lights.push_back(light);
+	app->scene.lights.push_back(light1);
+
+	Light light2;
+	light2.type = LightType_Directional;
+	light2.color = vec3(1.0f, 1.0f, 1.0f);
+	light2.direction = vec3(-1.0f, -1.0f, -1.0f);
+	light2.position = vec3(0.0f, 0.0f, 2.0f);
+
+	app->scene.lights.push_back(light2);
 
 	
 	// for each buffer you need
@@ -830,12 +850,18 @@ void Gui(App* app)
 
 		if (ImGui::BeginMenu("Display")) {
 
-			if (ImGui::MenuItem("Final")) { app->framebufferToDisplay = FramebufferType::FINAL; }
-			if (ImGui::MenuItem("Albedo")) { app->framebufferToDisplay = FramebufferType::ALBEDO; }
-			if (ImGui::MenuItem("Normals")) { app->framebufferToDisplay = FramebufferType::NORMAL; }
-			if (ImGui::MenuItem("Position")) { app->framebufferToDisplay = FramebufferType::POSITION; }
-			if (ImGui::MenuItem("Lights")) { app->framebufferToDisplay = FramebufferType::LIGHTS; }
-			if (ImGui::MenuItem("Depth")) { app->framebufferToDisplay = FramebufferType::DEPTH; }
+			const char* displayOptions[] = { "Final", "Albedo", "Normals", "Position", "Lights", "Depth" };
+
+			if (ImGui::BeginCombo("Display Option", displayOptions[app->framebufferToDisplay])) {
+				for (int n = 0; n < IM_ARRAYSIZE(displayOptions); n++) {
+					if (ImGui::Selectable(displayOptions[n], app->framebufferToDisplay == n)) 
+					{	
+						app->framebufferToDisplay = (FramebufferType)n;	
+					}
+				}
+
+				ImGui::EndCombo();
+			}
 
 			ImGui::EndMenu();
 		}
@@ -896,17 +922,12 @@ void Update(App* app)
 		}
 	}
 
-
-
 	// when minimizing the window, displaySize.y == 0 -> displaySize.x/0 -> error
 	if (app->displaySize.y > 0) {
 		float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
 		app->projection = glm::perspective(glm::radians(60.0f), aspectRatio, app->scene.camera.zNear, app->scene.camera.zFar);
 		app->view = glm::lookAt(app->scene.camera.transform.getPosition(), app->scene.camera.transform.getPosition() + app->scene.camera.transform.getForward(), app->scene.camera.transform.getUp());
 	}
-
-	GameObject& gameObject = app->scene.gameObjects.back();
-	gameObject.transform.rotate(1.0f, vec3(0.0f, 1.0f, 0.0f));
 
 	// global uniforms
 	app->globalUniformHead = app->uniformsBuffer.head;
