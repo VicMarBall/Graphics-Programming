@@ -54,7 +54,6 @@ struct App
 	GLuint programUniformTextureNormals;
 	GLuint programUniformTexturePosition;
 	GLuint programUniformTextureDepth;
-	GLuint texturedMeshProgram_uTexture;
 
 	// VAO object to link our screen filling quad with our textured quad shader
 	GLuint quadVAO;

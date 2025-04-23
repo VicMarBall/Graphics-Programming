@@ -1017,7 +1017,6 @@ void Render(App* app)
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-			glUniform1i(app->texturedMeshProgram_uTexture, 0);
 
 			Submesh& submesh = mesh.submeshes[i];
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
@@ -1071,6 +1070,5 @@ void Render(App* app)
 
 	glBindVertexArray(0);
 	glUseProgram(0);
-
 }
 
