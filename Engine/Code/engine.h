@@ -90,8 +90,16 @@ struct App
 	const unsigned char* glExtensions;
 
 	// imgui UI
+	bool showGuizmos;
 	bool UIshowInfo;
 	FramebufferType framebufferToDisplay;
+	bool UIsceneHierarchy;
+
+	bool UIgameObjectInspector;
+	bool UIlightInspector;
+
+	GameObject* gameObjectSelected;
+	Light* lightSelected;
 
 	// resources
 	std::vector<Texture>  textures;

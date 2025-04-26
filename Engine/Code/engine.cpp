@@ -349,7 +349,13 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 void Init(App* app)
 {
 	app->framebufferToDisplay = FramebufferType::FINAL;
+	app->showGuizmos = true;
 	app->UIshowInfo = false;
+	app->UIsceneHierarchy = true;
+	app->gameObjectSelected = nullptr;
+	app->lightSelected = nullptr;
+	app->UIgameObjectInspector = true;
+	app->UIlightInspector = true;
 
 	app->glVersion = glGetString(GL_VERSION);
 	app->glRenderer = glGetString(GL_RENDERER);
@@ -812,18 +818,18 @@ void Init(App* app)
 	}
 
 	// stress test lights
-	//s{
-	//s	// when trying to reach 256 the uniform buffer overflows
-	//s	for (int i = 0; i < 128; ++i) {
-	//s		Light light;
-	//s		light.type = LightType_Point;
-	//s		light.color = vec3((i % 4) / 3, floorf(i / 4), (i % 16) / 15);
-	//s		light.transform.translate(vec3(i % 4, 0.0f, floorf(i / 4)), GLOBAL);
-	//s		light.transform.scale(vec3(0.2f, 0.2f, 0.2f));
-	//s
-	//s		app->scene.lights.push_back(light);
-	//s	}
-	//s}
+	//{
+	//	// when trying to reach 256 the uniform buffer overflows
+	//	for (int i = 0; i < 128; ++i) {
+	//		Light light;
+	//		light.type = LightType_Point;
+	//		light.color = vec3((i % 4) / 3, floorf(i / 4), (i % 16) / 15);
+	//		light.transform.translate(vec3(i % 4, 0.0f, floorf(i / 4)), GLOBAL);
+	//		light.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+	//
+	//		app->scene.lights.push_back(light);
+	//	}
+	//}
 	
 	// for each buffer you need
 
@@ -842,6 +848,10 @@ void Init(App* app)
 
 void Gui(App* app)
 {
+	ImGuiDockNodeFlags dock_flags = 0;
+	dock_flags |= ImGuiDockNodeFlags_PassthruCentralNode;
+	ImGui::DockSpaceOverViewport(0, dock_flags);
+
 	if (app->UIshowInfo) {
 		ImGui::Begin("Info", &app->UIshowInfo);
 
@@ -856,6 +866,63 @@ void Gui(App* app)
 		ImGui::End();
 	}
 
+	if (app->UIsceneHierarchy) {
+		ImGui::Begin("Hierarchy", &app->UIsceneHierarchy);
+
+		if (ImGui::CollapsingHeader("Lights")) {
+			int i = 1;
+			for (Light& light : app->scene.lights) {
+				if (ImGui::Selectable(("Light " + std::to_string(i)).c_str(), app->lightSelected == &light)) { app->lightSelected = &light; }
+				i++;
+			}
+		}
+
+		if (ImGui::CollapsingHeader("GameObjects")) {
+			int i = 1;
+			for (GameObject& GO : app->scene.gameObjects) {
+				if (ImGui::Selectable(("GameObject " + std::to_string(i)).c_str(), app->gameObjectSelected == &GO)) { app->gameObjectSelected = &GO; }
+				i++;
+			}
+		}
+
+		ImGui::End();
+	}
+
+	if (app->UIlightInspector) {
+		ImGui::Begin("Light Inspector", &app->UIlightInspector);
+		if (app->lightSelected == nullptr) { ImGui::Text("Light not selected"); }
+		else {
+
+			ImGui::ColorEdit3("Color", &app->lightSelected->color.r);
+
+
+			const char* lightTypes[] = { "Point Light", "Directional Light" };
+
+			if (ImGui::BeginCombo("Type", lightTypes[app->lightSelected->type])) {
+				for (int n = 0; n < IM_ARRAYSIZE(lightTypes); n++) {
+					if (ImGui::Selectable(lightTypes[n], app->lightSelected->type == n))
+					{
+						app->lightSelected->type = (LightType)n;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+		}
+
+		ImGui::End();
+	}
+
+
+	if (app->UIgameObjectInspector) {
+		ImGui::Begin("Game Object Inspector", &app->UIgameObjectInspector);
+		if (app->gameObjectSelected == nullptr) { ImGui::Text("GameObject not selected"); }
+		else {
+
+		}
+
+		ImGui::End();
+	}
 
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("General")) {
@@ -866,6 +933,8 @@ void Gui(App* app)
 		}
 
 		if (ImGui::BeginMenu("Display")) {
+
+			ImGui::Checkbox("Show Guizmos", &app->showGuizmos);
 
 			const char* displayOptions[] = { "Final", "Albedo", "Normals", "Position", "Lights", "Depth" };
 
@@ -1095,50 +1164,52 @@ void Render(App* app)
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-	// draw gizmos
-	for (const Light& light : app->scene.lights)
+	if (app->showGuizmos)
 	{
-		// set the block of the uniform
-		u32 blockOffset = light.localUniformBufferHead;
-		u32 blockSize = light.localUniformBufferSize;
-		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
-
-		// use the program
-		Program& meshProgram = app->programs[app->basicShapesProgramIdx];
-		glUseProgram(meshProgram.handle);
-
-		// draw the mesh
-		Model model;
-
-		switch (light.type)
+		// draw gizmos
+		for (const Light& light : app->scene.lights)
 		{
-		case LightType_Directional:
-			model = app->models[app->planeIdx];
-			break;
-		case LightType_Point:
-			model = app->models[app->sphereIdx];
-			break;
-		default:
-			break;
-		}
+			// set the block of the uniform
+			u32 blockOffset = light.localUniformBufferHead;
+			u32 blockSize = light.localUniformBufferSize;
+			glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
 
-		Mesh& mesh = app->meshes[model.meshIdx];
+			// use the program
+			Program& meshProgram = app->programs[app->basicShapesProgramIdx];
+			glUseProgram(meshProgram.handle);
 
-		for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
-			GLuint vao = FindVAO(mesh, i, meshProgram);
-			glBindVertexArray(vao);
+			// draw the mesh
+			Model model;
 
-			u32 submeshMaterialIdx = model.materialIdx[i];
-			Material& submeshMaterial = app->materials[submeshMaterialIdx];
+			switch (light.type)
+			{
+			case LightType_Directional:
+				model = app->models[app->planeIdx];
+				break;
+			case LightType_Point:
+				model = app->models[app->sphereIdx];
+				break;
+			default:
+				break;
+			}
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+			Mesh& mesh = app->meshes[model.meshIdx];
 
-			Submesh& submesh = mesh.submeshes[i];
-			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+			for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+				GLuint vao = FindVAO(mesh, i, meshProgram);
+				glBindVertexArray(vao);
+
+				u32 submeshMaterialIdx = model.materialIdx[i];
+				Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+
+				Submesh& submesh = mesh.submeshes[i];
+				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+			}
 		}
 	}
-
 
 	glBindVertexArray(0);
 	glUseProgram(0);
