@@ -62,6 +62,11 @@ public:
 		}
 	}
 
+	void setPosition(glm::vec3 position)
+	{
+		_position = position;
+	}
+
 private:
 	union {
 		glm::mat4 _transform;

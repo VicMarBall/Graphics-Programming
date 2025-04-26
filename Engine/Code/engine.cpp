@@ -893,8 +893,10 @@ void Gui(App* app)
 		if (app->lightSelected == nullptr) { ImGui::Text("Light not selected"); }
 		else {
 
-			ImGui::ColorEdit3("Color", &app->lightSelected->color.r);
+			glm::vec3 editPosition = app->lightSelected->transform.getPosition();
+			if (ImGui::DragFloat3("Position", &editPosition.x, 0.1f)) { app->lightSelected->transform.setPosition(editPosition); }
 
+			ImGui::ColorEdit3("Color", &app->lightSelected->color.r);
 
 			const char* lightTypes[] = { "Point Light", "Directional Light" };
 
@@ -918,6 +920,9 @@ void Gui(App* app)
 		ImGui::Begin("Game Object Inspector", &app->UIgameObjectInspector);
 		if (app->gameObjectSelected == nullptr) { ImGui::Text("GameObject not selected"); }
 		else {
+
+			glm::vec3 editPosition = app->gameObjectSelected->transform.getPosition();
+			if (ImGui::DragFloat3("Position", &editPosition.x, 0.1f)) { app->gameObjectSelected->transform.setPosition(editPosition); }
 
 		}
 
