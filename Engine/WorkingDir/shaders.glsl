@@ -66,16 +66,21 @@ void main()
 	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);	
 	for (int i = 0; i < uLightCount; ++i)
 	{
+		vec3 diffuse;
 		switch (uLight[i].type)
 		{
 		case 0: // point light
 			float distanceToPoint = distance(uLight[i].position, position);
 			vec3 directionVector = position - uLight[i].position;
 
-			lightColor += max(0.0f, -dot(normals, normalize(directionVector))) * uLight[i].color / distanceToPoint;
+			diffuse = max(0.0f, -dot(normals, normalize(directionVector))) * uLight[i].color / distanceToPoint;
+
+			lightColor += diffuse;
 			break;
 		case 1: // directional
-			lightColor += max(0.0f, -dot(normals, normalize(uLight[i].direction))) * uLight[i].color;
+			diffuse = max(0.0f, -dot(normals, normalize(uLight[i].direction))) * uLight[i].color;
+
+			lightColor += diffuse;
 			break;
 		default:
 			break;
