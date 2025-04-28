@@ -786,7 +786,7 @@ void Init(App* app)
 
 	plane.transform.scale(vec3(10.0f, 10.0f, 10.0f));
 	plane.transform.translate(vec3(0, -3.5f, 0), GLOBAL);
-	plane.transform.rotate(90.0f, vec3(-1, 0, 0), GLOBAL);
+	plane.transform.setRotation(vec3(-90, 0, 0));
 
 	plane.modelID = app->planeIdx;
 	plane.programID = app->basicShapesProgramIdx;
@@ -811,8 +811,7 @@ void Init(App* app)
 		Light light2;
 		light2.type = LightType_Directional;
 		light2.color = vec3(1.0f, 1.0f, 1.0f);
-		light2.transform.rotate(180.0f, vec3(0, 1, 0), GLOBAL);
-		light2.transform.rotate(-45.0f, vec3(1, 0, 0), GLOBAL);
+		light2.transform.setRotation(vec3(45, 0, 0));
 		light2.transform.scale(vec3(0.2f, 0.2f, 0.2f));
 	
 		app->scene.lights.push_back(light2);
@@ -937,6 +936,9 @@ void Gui(App* app)
 
 			glm::vec3 editPosition = app->lightSelected->transform.getPosition();
 			if (ImGui::DragFloat3("Position", &editPosition.x, 0.1f)) { app->lightSelected->transform.setPosition(editPosition); }
+
+			glm::vec3 editRotation = app->lightSelected->transform.getRotation();
+			if (ImGui::DragFloat3("Rotation", &editRotation.x, 0.1f)) { app->lightSelected->transform.setRotation(editRotation); }
 
 			ImGui::ColorEdit3("Color", &app->lightSelected->color.r);
 

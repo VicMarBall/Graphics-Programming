@@ -24,6 +24,8 @@ public:
 	glm::vec3 getForward() const { return _forward; }
 
 	glm::vec3 getPosition() const { return _position; }
+	glm::vec3 getRotation() { return glm::degrees(glm::eulerAngles(glm::quat_cast((_transform)))); }
+	glm::vec3 getScale() { return glm::vec3(glm::length(_right), glm::length(_up), glm::length(_forward)); }
 
 	void translate(glm::vec3 translation, TransformOrientation orientation = LOCAL)
 	{
@@ -65,6 +67,18 @@ public:
 	void setPosition(glm::vec3 position)
 	{
 		_position = position;
+	}
+
+	void setRotation(glm::vec3 rotation)
+	{
+		glm::vec3 prevScale = getScale();
+
+		glm::mat4 rotationMatrix = glm::mat4_cast(glm::quat(glm::radians(rotation)));
+		_right = rotationMatrix[0];
+		_up = rotationMatrix[1];
+		_forward = rotationMatrix[2];
+
+		scale(prevScale);
 	}
 
 private:
