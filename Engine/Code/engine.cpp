@@ -1044,6 +1044,13 @@ void Gui(App* app)
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Window")) {
+			if (ImGui::MenuItem("Hierarchy")) { app->UIsceneHierarchy = true; }
+			if (ImGui::MenuItem("Light Inspector")) { app->UIlightInspector = true; }
+			if (ImGui::MenuItem("GameObject Inspector")) { app->UIgameObjectInspector = true; }
+
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenuBar();
 	}
