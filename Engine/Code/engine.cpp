@@ -998,11 +998,11 @@ void Gui(App* app)
 
 			ImGui::Checkbox("Show Guizmos", &app->showGuizmos);
 
-			const char* displayOptions[] = { "Final", "Albedo", "Normals", "Position", "Lights", "Depth" };
+			const char* framebufferToDisplayOptions[] = { "Final", "Albedo", "Normals", "Position", "Lights", "Depth" };
 
-			if (ImGui::BeginCombo("Display Option", displayOptions[app->framebufferToDisplay])) {
-				for (int n = 0; n < IM_ARRAYSIZE(displayOptions); n++) {
-					if (ImGui::Selectable(displayOptions[n], app->framebufferToDisplay == n)) 
+			if (ImGui::BeginCombo("Framebuffer To Display", framebufferToDisplayOptions[app->framebufferToDisplay])) {
+				for (int n = 0; n < IM_ARRAYSIZE(framebufferToDisplayOptions); n++) {
+					if (ImGui::Selectable(framebufferToDisplayOptions[n], app->framebufferToDisplay == n))
 					{	
 						app->framebufferToDisplay = (FramebufferType)n;	
 					}
