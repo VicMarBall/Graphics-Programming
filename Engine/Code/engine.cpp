@@ -459,14 +459,14 @@ void Init(App* app)
 				std::vector<float> vertices;
 				std::vector<u32> indices;
 
-				// process vertices (CHANGE MANUALLY)
-				vertices.push_back(-1);	vertices.push_back(0); vertices.push_back(-1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
-				vertices.push_back(-1);	vertices.push_back(0); vertices.push_back(1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
-				vertices.push_back(1);	vertices.push_back(0); vertices.push_back(1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
-				vertices.push_back(1);	vertices.push_back(0); vertices.push_back(-1);		vertices.push_back(0); vertices.push_back(1); vertices.push_back(0);
+				// process vertices
+				vertices.push_back(-1);	vertices.push_back(-1); vertices.push_back(0);		vertices.push_back(0); vertices.push_back(0); vertices.push_back(1);
+				vertices.push_back(-1);	vertices.push_back(1);	vertices.push_back(0);		vertices.push_back(0); vertices.push_back(0); vertices.push_back(1);
+				vertices.push_back(1);	vertices.push_back(1);	vertices.push_back(0);		vertices.push_back(0); vertices.push_back(0); vertices.push_back(1);
+				vertices.push_back(1);	vertices.push_back(-1); vertices.push_back(0);		vertices.push_back(0); vertices.push_back(0); vertices.push_back(1);
 
 
-				// process indices (CHANGE MANUALLY)
+				// process indices
 				indices.push_back(0);
 				indices.push_back(1);
 				indices.push_back(2);
@@ -786,6 +786,7 @@ void Init(App* app)
 
 	plane.transform.scale(vec3(10.0f, 10.0f, 10.0f));
 	plane.transform.translate(vec3(0, -3.5f, 0), GLOBAL);
+	plane.transform.rotate(90.0f, vec3(-1, 0, 0), GLOBAL);
 
 	plane.modelID = app->planeIdx;
 	plane.programID = app->basicShapesProgramIdx;
@@ -815,6 +816,47 @@ void Init(App* app)
 		light2.transform.scale(vec3(0.2f, 0.2f, 0.2f));
 	
 		app->scene.lights.push_back(light2);
+
+		Light light3;
+		light3.type = LightType_Point;
+		light3.color = vec3(0.0f, 1.0f, 1.0f);
+		light3.transform.translate(vec3(-3.0f, -2.0f, -1.0f), GLOBAL);
+		light3.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+
+		app->scene.lights.push_back(light3);
+
+		Light light4;
+		light4.type = LightType_Point;
+		light4.color = vec3(1.0f, 0.0f, 1.0f);
+		light4.transform.translate(vec3(3.0f, -2.0f, -2.0f), GLOBAL);
+		light4.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+
+		app->scene.lights.push_back(light4);
+
+		Light light5;
+		light5.type = LightType_Point;
+		light5.color = vec3(1.0f, 0.0f, 0.0f);
+		light5.transform.translate(vec3(5.0f, 1.0f, -3.0f), GLOBAL);
+		light5.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+
+		app->scene.lights.push_back(light5);
+
+		Light light6;
+		light6.type = LightType_Point;
+		light6.color = vec3(0.0f, 1.0f, 0.0f);
+		light6.transform.translate(vec3(0.0f, -2.0f, -3.0f), GLOBAL);
+		light6.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+
+		app->scene.lights.push_back(light6);
+
+		Light light7;
+		light7.type = LightType_Point;
+		light7.color = vec3(0.0f, 0.0f, 1.0f);
+		light7.transform.translate(vec3(-5.0f, 2.0f, -2.0f), GLOBAL);
+		light7.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+
+		app->scene.lights.push_back(light7);
+
 	}
 
 	// stress test lights
@@ -823,8 +865,8 @@ void Init(App* app)
 	//	for (int i = 0; i < 128; ++i) {
 	//		Light light;
 	//		light.type = LightType_Point;
-	//		light.color = vec3((i % 4) / 3, floorf(i / 4), (i % 16) / 15);
-	//		light.transform.translate(vec3(i % 4, 0.0f, floorf(i / 4)), GLOBAL);
+	//		light.color = vec3(float(i % 4) / 3.0f, float(i % 8) / 7.0f, float(i % 16) / 15.0f);
+	//		light.transform.translate(vec3(i % 4, -0.5f, floorf(i / 4)), GLOBAL);
 	//		light.transform.scale(vec3(0.2f, 0.2f, 0.2f));
 	//
 	//		app->scene.lights.push_back(light);
