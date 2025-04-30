@@ -56,7 +56,8 @@
     <ClInclude Include="Code\transform.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="WorkingDir\shaders.glsl" />
+    <None Include="WorkingDir\deferred_mesh.glsl" />
+    <None Include="WorkingDir\screen_quad.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
