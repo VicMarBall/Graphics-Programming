@@ -16,6 +16,9 @@
     <Filter Include="Stb">
       <UniqueIdentifier>{0ac2ff0f-5f18-480a-8bd6-6aa7428166bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Scene">
+      <UniqueIdentifier>{1196a229-e762-4e89-b383-6d86beebf283}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp">
@@ -98,14 +101,26 @@
     <ClInclude Include="Code\assimpImport.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Code\scene.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Code\resources.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Code\buffer.h">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\scene.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\transform.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\game_object.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\light.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\camera.h">
+      <Filter>Engine\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
