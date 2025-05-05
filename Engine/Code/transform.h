@@ -82,9 +82,16 @@ public:
 	{
 		rotation = glm::radians(rotation);
 
-		glm::quat quaternion = glm::angleAxis(rotation.x, glm::vec3(1, 0, 0));
-		quaternion *= glm::angleAxis(rotation.y, glm::vec3(0, 1, 0));
-		quaternion *= glm::angleAxis(rotation.z, glm::vec3(0, 0, 1));
+		glm::quat quaternion(rotation);
+
+		//glm::quat quaternion = glm::angleAxis(rotation.x, glm::vec3(1, 0, 0));
+		//rotation = glm::normalize(quaternion);
+
+		//quaternion *= glm::angleAxis(rotation.y, glm::vec3(0, 1, 0));
+		//rotation = glm::normalize(quaternion * rotation);
+
+		//quaternion *= glm::angleAxis(rotation.z, glm::vec3(0, 0, 1));
+		//rotation = glm::normalize(quaternion * rotation);
 
 		_transform = glm::translate(glm::mat4(1.0f), getPosition()) * glm::mat4_cast(quaternion) * glm::scale(glm::mat4(1.0f), getScale());
 	}
