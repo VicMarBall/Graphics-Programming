@@ -16,6 +16,15 @@
     <Filter Include="Stb">
       <UniqueIdentifier>{0ac2ff0f-5f18-480a-8bd6-6aa7428166bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Scene">
+      <UniqueIdentifier>{1196a229-e762-4e89-b383-6d86beebf283}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Forward">
+      <UniqueIdentifier>{d2a10240-b4e1-48e4-8b4e-1fe35f0a923a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred">
+      <UniqueIdentifier>{23750c82-b827-42c0-901d-77612e0bc111}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp">
@@ -98,19 +107,34 @@
     <ClInclude Include="Code\assimpImport.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Code\scene.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Code\resources.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Code\buffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Code\scene.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\transform.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\game_object.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\light.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\camera.h">
+      <Filter>Engine\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="WorkingDir\shaders.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="WorkingDir\screen_quad.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="WorkingDir\deferred_mesh.glsl">
+      <Filter>Shaders\Deferred</Filter>
     </None>
   </ItemGroup>
 </Project>

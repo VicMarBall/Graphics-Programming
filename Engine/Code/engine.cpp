@@ -424,7 +424,7 @@ void Init(App* app)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
 		glBindVertexArray(0);
 
-		app->screenQuadProgramIdx = LoadProgram(app, "shaders.glsl", "SCREEN_QUAD");
+		app->screenQuadProgramIdx = LoadProgram(app, "screen_quad.glsl", "SCREEN_QUAD");
 		Program& texturedGeometryProgram = app->programs[app->screenQuadProgramIdx];
 		app->programCurrentFramebufferLocation = glGetUniformLocation(texturedGeometryProgram.handle, "usedFramebuffer");
 		app->programUniformTextureAlbedo = glGetUniformLocation(texturedGeometryProgram.handle, "uAlbedo");
@@ -435,7 +435,7 @@ void Init(App* app)
 
 	// load basic shapes
 	{
-		app->basicShapesProgramIdx = LoadProgram(app, "shaders.glsl", "BASIC_SHAPE");
+		app->basicShapesProgramIdx = LoadProgram(app, "deferred_mesh.glsl", "BASIC_SHAPE");
 
 		// plane
 		{
@@ -756,7 +756,7 @@ void Init(App* app)
 		gameObject.modelID = modelID;
 
 		// program
-		u32 programID = LoadProgram(app, "shaders.glsl", "TEXTURED_MESH");
+		u32 programID = LoadProgram(app, "deferred_mesh.glsl", "TEXTURED_MESH");
 		gameObject.programID = programID;
 
 		app->scene.gameObjects.push_back(GameObject());
