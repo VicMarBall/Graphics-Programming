@@ -128,6 +128,9 @@
     <ClInclude Include="Code\camera.h">
       <Filter>Engine\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Code\bloom.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\screen_quad.glsl">

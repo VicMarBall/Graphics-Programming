@@ -33,6 +33,7 @@
     <ClCompile Include="ThirdParty\stb\stb.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\bloom.h" />
     <ClInclude Include="Code\camera.h" />
     <ClInclude Include="Code\assimpImport.h" />
     <ClInclude Include="Code\buffer.h" />
