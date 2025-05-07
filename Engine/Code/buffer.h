@@ -5,11 +5,11 @@
 
 struct Buffer 
 {
-    GLuint handle;
-    GLenum type;
-    u32 size;
-    u32 head;
-    void* data; // mapped data
+	GLuint handle;
+	GLenum type;
+	u32 size;
+	u32 head;
+	void* data; // mapped data
 };
 
 bool IsPowerOf2(u32 value);
