@@ -368,8 +368,8 @@ void Init(App* app)
 
 	CreateFrameBuffers(app);
 
-	app->scene.camera.transform.translate(vec3(0.0f, 0.0f, 10.0f));
-	app->scene.camera.transform.rotate(180.0f, vec3(0, 1, 0), GLOBAL);
+	app->scene.camera.transform.setPosition(vec3(0.0f, 0.0f, 10.0f));
+	app->scene.camera.transform.setRotation(vec3(0, 180, 0));
 
 	// TODO: Initialize your resources here!
 	// - vertex buffers
@@ -765,7 +765,7 @@ void Init(App* app)
 		gameObject2.modelID = modelID;
 		gameObject2.programID = programID;
 
-		gameObject2.transform.translate(vec3(5.0f, 0.0f, 0.0f));
+		gameObject2.transform.setPosition(vec3(5.0f, 0.0f, 0.0f));
 
 		app->scene.gameObjects.push_back(GameObject());
 		GameObject& bakerHouse = app->scene.gameObjects.back();
@@ -776,16 +776,16 @@ void Init(App* app)
 
 		bakerHouse.programID = programID;
 
-		bakerHouse.transform.translate(vec3(-5.0f, 0.0f, 0.0f));
-		bakerHouse.transform.scale(vec3(0.01f, 0.01f, 0.01f));
+		bakerHouse.transform.setPosition(vec3(-5.0f, 0.0f, 0.0f));
+		bakerHouse.transform.setScale(vec3(0.01f, 0.01f, 0.01f));
 	}
 
 
 	app->scene.gameObjects.push_back(GameObject());
 	GameObject& plane = app->scene.gameObjects.back();
 
-	plane.transform.scale(vec3(10.0f, 10.0f, 10.0f));
-	plane.transform.translate(vec3(0, -3.5f, 0), GLOBAL);
+	plane.transform.setScale(vec3(10.0f, 10.0f, 10.0f));
+	plane.transform.setPosition(vec3(0, -3.5f, 0));
 	plane.transform.setRotation(vec3(-90, 0, 0));
 
 	plane.modelID = app->planeIdx;
@@ -803,8 +803,8 @@ void Init(App* app)
 		Light light1;
 		light1.type = LightType_Point;
 		light1.color = vec3(1.0f, 1.0f, 0.0f);
-		light1.transform.translate(vec3(0.0f, 2.0f, -1.0f), GLOBAL);
-		light1.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light1.transform.setPosition(vec3(0.0f, 2.0f, -1.0f));
+		light1.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 	
 		app->scene.lights.push_back(light1);
 	
@@ -812,47 +812,47 @@ void Init(App* app)
 		light2.type = LightType_Directional;
 		light2.color = vec3(1.0f, 1.0f, 1.0f);
 		light2.transform.setRotation(vec3(170, 0, 0));
-		light2.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light2.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 	
 		app->scene.lights.push_back(light2);
 
 		Light light3;
 		light3.type = LightType_Point;
 		light3.color = vec3(0.0f, 1.0f, 1.0f);
-		light3.transform.translate(vec3(-3.0f, -2.0f, -1.0f), GLOBAL);
-		light3.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light3.transform.setPosition(vec3(-3.0f, -2.0f, -1.0f));
+		light3.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 
 		app->scene.lights.push_back(light3);
 
 		Light light4;
 		light4.type = LightType_Point;
 		light4.color = vec3(1.0f, 0.0f, 1.0f);
-		light4.transform.translate(vec3(3.0f, -2.0f, -2.0f), GLOBAL);
-		light4.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light4.transform.setPosition(vec3(3.0f, -2.0f, -2.0f));
+		light4.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 
 		app->scene.lights.push_back(light4);
 
 		Light light5;
 		light5.type = LightType_Point;
 		light5.color = vec3(1.0f, 0.0f, 0.0f);
-		light5.transform.translate(vec3(5.0f, 1.0f, -3.0f), GLOBAL);
-		light5.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light5.transform.setPosition(vec3(5.0f, 1.0f, -3.0f));
+		light5.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 
 		app->scene.lights.push_back(light5);
 
 		Light light6;
 		light6.type = LightType_Point;
 		light6.color = vec3(0.0f, 1.0f, 0.0f);
-		light6.transform.translate(vec3(0.0f, -2.0f, -3.0f), GLOBAL);
-		light6.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light6.transform.setPosition(vec3(0.0f, -2.0f, -3.0f));
+		light6.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 
 		app->scene.lights.push_back(light6);
 
 		Light light7;
 		light7.type = LightType_Point;
 		light7.color = vec3(0.0f, 0.0f, 1.0f);
-		light7.transform.translate(vec3(-5.0f, 2.0f, -2.0f), GLOBAL);
-		light7.transform.scale(vec3(0.2f, 0.2f, 0.2f));
+		light7.transform.setPosition(vec3(-5.0f, 2.0f, -2.0f));
+		light7.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
 
 		app->scene.lights.push_back(light7);
 
@@ -933,8 +933,6 @@ void Gui(App* app)
 		ImGui::Begin("Light Inspector", &app->UIlightInspector);
 		if (app->lightSelected == nullptr) { ImGui::Text("Light not selected"); }
 		else {
-			ImGui::Text("please don't touch too much the rotation");
-
 			glm::vec3 editPosition = app->lightSelected->transform.getPosition();
 			if (ImGui::DragFloat3("Position", &editPosition.x, 0.1f)) { app->lightSelected->transform.setPosition(editPosition); }
 
@@ -970,8 +968,6 @@ void Gui(App* app)
 		ImGui::Begin("Game Object Inspector", &app->UIgameObjectInspector);
 		if (app->gameObjectSelected == nullptr) { ImGui::Text("GameObject not selected"); }
 		else {
-			ImGui::Text("please don't touch too much the rotation");
-
 			glm::vec3 editPosition = app->gameObjectSelected->transform.getPosition();
 			if (ImGui::DragFloat3("Position", &editPosition.x, 0.1f)) { app->gameObjectSelected->transform.setPosition(editPosition); }
 
@@ -1062,18 +1058,21 @@ void Update(App* app)
 {
 	// You can handle app->input keyboard/mouse here
 	float cameraSpeed = 0.1f;
+
+	glm::mat4 cameraMatrix = app->scene.camera.transform.getTransformationMatrix();
+	
 	// camera translation
-	if (app->input.keys[K_W]) { app->scene.camera.transform.translate(vec3( 0.0f, 0.0f,  1.0f) * cameraSpeed); }
-	if (app->input.keys[K_A]) { app->scene.camera.transform.translate(vec3( 1.0f, 0.0f,  0.0f) * cameraSpeed); }
-	if (app->input.keys[K_S]) { app->scene.camera.transform.translate(vec3( 0.0f, 0.0f, -1.0f) * cameraSpeed); }
-	if (app->input.keys[K_D]) { app->scene.camera.transform.translate(vec3(-1.0f, 0.0f,  0.0f) * cameraSpeed); }
+	if (app->input.keys[K_W]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + ( vec3(cameraMatrix[2]) * cameraSpeed)); }
+	if (app->input.keys[K_A]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + ( vec3(cameraMatrix[0]) * cameraSpeed)); }
+	if (app->input.keys[K_S]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + (-vec3(cameraMatrix[2]) * cameraSpeed)); }
+	if (app->input.keys[K_D]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + (-vec3(cameraMatrix[0]) * cameraSpeed)); }
 
 	// camera rotation
 	{
 		float cameraRotationSpeed = 0.1f;
 		if (app->input.mouseButtons[RIGHT]) {
-			app->scene.camera.transform.rotate(cameraRotationSpeed * -app->input.mouseDelta.x, vec3(0.0f, 1.0f, 0.0f), GLOBAL);
-			app->scene.camera.transform.rotate(cameraRotationSpeed * app->input.mouseDelta.y, vec3(1.0f, 0.0f, 0.0f));
+			app->scene.camera.transform.setRotation(app->scene.camera.transform.getRotation() + (cameraRotationSpeed * -app->input.mouseDelta.x * vec3(0.0f, 1.0f, 0.0f)));
+			app->scene.camera.transform.setRotation(app->scene.camera.transform.getRotation() + (cameraRotationSpeed * app->input.mouseDelta.y * vec3(1.0f, 0.0f, 0.0f)));
 		}
 	}
 
@@ -1081,7 +1080,8 @@ void Update(App* app)
 	if (app->displaySize.y > 0) {
 		float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
 		app->projection = glm::perspective(glm::radians(60.0f), aspectRatio, app->scene.camera.zNear, app->scene.camera.zFar);
-		app->view = glm::lookAt(app->scene.camera.transform.getPosition(), app->scene.camera.transform.getPosition() + app->scene.camera.transform.getForward(), app->scene.camera.transform.getUp());
+		glm::mat4 cameraMatrix = app->scene.camera.transform.getTransformationMatrix();
+		app->view = glm::lookAt(app->scene.camera.transform.getPosition(), app->scene.camera.transform.getPosition() + glm::vec3(cameraMatrix[2]), glm::vec3(cameraMatrix[1]));
 	}
 
 	// global uniforms
@@ -1098,7 +1098,8 @@ void Update(App* app)
 
 		PushUInt(app->uniformsBuffer, light.type);
 		PushVec3(app->uniformsBuffer, light.color);
-		PushVec3(app->uniformsBuffer, light.transform.getForward());
+		glm::mat4 lightMatrix = light.transform.getTransformationMatrix();
+		PushVec3(app->uniformsBuffer, glm::vec3(lightMatrix[2]));
 		PushVec3(app->uniformsBuffer, light.transform.getPosition());
 	}
 
@@ -1110,10 +1111,12 @@ void Update(App* app)
 	{
 		AlignHead(app->uniformsBuffer, app->uniformBlockAlignment);
 
-		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * gameObject.transform.getTransform();
+		glm::mat4 goMatrix = gameObject.transform.getTransformationMatrix();
+
+		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * goMatrix;
 
 		gameObject.localUniformBufferHead = app->uniformsBuffer.head;
-		PushMat4(app->uniformsBuffer, gameObject.transform.getTransform());
+		PushMat4(app->uniformsBuffer, goMatrix);
 		PushMat4(app->uniformsBuffer, worldViewProjectionMatrix);
 		gameObject.localUniformBufferSize = app->uniformsBuffer.head - gameObject.localUniformBufferHead;
 	}
@@ -1122,10 +1125,12 @@ void Update(App* app)
 	for (Light& light : app->scene.lights) {
 		AlignHead(app->uniformsBuffer, app->uniformBlockAlignment);
 
-		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * light.transform.getTransform();
+		glm::mat4 lightMatrix = light.transform.getTransformationMatrix();
+
+		glm::mat4 worldViewProjectionMatrix = app->projection * app->view * lightMatrix;
 
 		light.localUniformBufferHead = app->uniformsBuffer.head;
-		PushMat4(app->uniformsBuffer, light.transform.getTransform());
+		PushMat4(app->uniformsBuffer, lightMatrix);
 		PushMat4(app->uniformsBuffer, worldViewProjectionMatrix);
 		light.localUniformBufferSize = app->uniformsBuffer.head - light.localUniformBufferHead;
 	}
