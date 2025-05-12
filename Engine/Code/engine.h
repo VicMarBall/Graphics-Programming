@@ -7,10 +7,11 @@
 #include "platform.h"
 #include "scene.h"
 #include "buffer.h"
+#include "framebuffer.h"
 #include "resources.h"
 #include <glad/glad.h>
 
-enum FramebufferType
+enum FramebufferDisplayType
 {
 	FINAL,
 	ALBEDO,
@@ -73,7 +74,7 @@ struct App
 	u32 globalUniformSize;
 
 	// framebuffer
-	GLuint framebufferHandle;
+	FramebufferObject displayFramebuffer;
 
 	// attachments
 	GLuint colorAttachmentHandle;
@@ -92,7 +93,7 @@ struct App
 	// imgui UI
 	bool showGuizmos;
 	bool UIshowInfo;
-	FramebufferType framebufferToDisplay;
+	FramebufferDisplayType framebufferToDisplay;
 	bool UIsceneHierarchy;
 
 	bool UIgameObjectInspector;

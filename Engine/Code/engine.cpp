@@ -260,34 +260,18 @@ void CreateScreenFramebuffers(App* app)
 
 
 	// framebuffer object (FBO)
-	glGenFramebuffers(1, &app->framebufferHandle);
-	glBindFramebuffer(GL_FRAMEBUFFER, app->framebufferHandle);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->normalAttachmentHandle, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, app->positionAttachmentHandle, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle, 0);
+	app->displayFramebuffer.bind();
+	app->displayFramebuffer.addColorAttachment(GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle);
+	app->displayFramebuffer.addColorAttachment(GL_COLOR_ATTACHMENT1, app->normalAttachmentHandle);
+	app->displayFramebuffer.addColorAttachment(GL_COLOR_ATTACHMENT2, app->positionAttachmentHandle);
+	app->displayFramebuffer.addColorAttachment(GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle);
 
 	GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 
-	GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE) 
-	{
-		switch (frameBufferStatus)
-		{
-			case GL_FRAMEBUFFER_UNDEFINED:						ELOG("GL_FRAMEBUFFER_UNDEFINED"); break;
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:			ELOG("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"); break;
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:	ELOG("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"); break;
-			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:			ELOG("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"); break;
-			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:			ELOG("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"); break;
-			case GL_FRAMEBUFFER_UNSUPPORTED:					ELOG("GL_FRAMEBUFFER_UNSUPPORTED"); break;
-			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:			ELOG("GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"); break;
-			case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:		ELOG("GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"); break;
-			default: ELOG("Unknown framebuffer status error"); break;
-		}
-	}
+	app->displayFramebuffer.checkStatus();
 
 	glDrawBuffers(ARRAY_COUNT(buffers), buffers);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	app->displayFramebuffer.unbind();
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
@@ -348,7 +332,7 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 
 void Init(App* app)
 {
-	app->framebufferToDisplay = FramebufferType::FINAL;
+	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
 	app->showGuizmos = true;
 	app->UIshowInfo = false;
 	app->UIsceneHierarchy = true;
@@ -1000,7 +984,7 @@ void Gui(App* app)
 				for (int n = 0; n < IM_ARRAYSIZE(framebufferToDisplayOptions); n++) {
 					if (ImGui::Selectable(framebufferToDisplayOptions[n], app->framebufferToDisplay == n))
 					{	
-						app->framebufferToDisplay = (FramebufferType)n;	
+						app->framebufferToDisplay = (FramebufferDisplayType)n;	
 					}
 				}
 
@@ -1142,8 +1126,8 @@ void Update(App* app)
 void Render(App* app)
 {
 	// render on this framebuffer render targets
-	glBindFramebuffer(GL_FRAMEBUFFER, app->framebufferHandle);
-
+	app->displayFramebuffer.bind();
+	
 	// clear color and depth
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1188,9 +1172,7 @@ void Render(App* app)
 		}
 	}
 	
-	
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	app->displayFramebuffer.unbind();
 
 	// render plane on the viewport to put the texture form the framebuffer
 	Program& programTexturedGeometry = app->programs[app->screenQuadProgramIdx];
