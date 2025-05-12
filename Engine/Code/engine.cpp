@@ -212,7 +212,7 @@ u32 LoadTexture2D(App* app, const char* filepath)
 	}
 }
 
-void CreateFrameBuffers(App* app)
+void CreateScreenFramebuffers(App* app)
 {
 	// color
 	glGenTextures(1, &app->colorAttachmentHandle);
@@ -366,7 +366,7 @@ void Init(App* app)
 		app->glExtensions = glGetStringi(GL_EXTENSIONS, GLuint(i));
 	}
 
-	CreateFrameBuffers(app);
+	CreateScreenFramebuffers(app);
 
 	app->scene.camera.transform.setPosition(vec3(0.0f, 0.0f, 10.0f));
 	app->scene.camera.transform.setRotation(vec3(0, 180, 0));
@@ -1144,10 +1144,6 @@ void Render(App* app)
 	// render on this framebuffer render targets
 	glBindFramebuffer(GL_FRAMEBUFFER, app->framebufferHandle);
 
-	// select on which render target to draw
-	GLuint drawBuffers[] = { app->colorAttachmentHandle, app->normalAttachmentHandle };
-	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
-
 	// clear color and depth
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1155,7 +1151,6 @@ void Render(App* app)
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
 	glEnable(GL_DEPTH_TEST);
-
 	
 	// render meshes
 	glEnable(GL_BLEND);
