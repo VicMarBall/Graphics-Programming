@@ -43,6 +43,7 @@
     <ClInclude Include="Code\scene.h" />
     <ClInclude Include="Code\game_object.h" />
     <ClInclude Include="Code\light.h" />
+    <ClInclude Include="Code\framebuffer.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\khrplatform.h" />
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h" />
