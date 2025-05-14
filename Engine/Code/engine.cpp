@@ -274,6 +274,11 @@ void CreateScreenFramebuffers(App* app)
 	app->displayFramebuffer.unbind();
 }
 
+void CreateFramebuffers(App* app)
+{
+	CreateScreenFramebuffers(app);
+}
+
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 	Submesh& submesh = mesh.submeshes[submeshIndex];
 
@@ -351,7 +356,7 @@ void Init(App* app)
 		app->glExtensions = glGetStringi(GL_EXTENSIONS, GLuint(i));
 	}
 
-	CreateScreenFramebuffers(app);
+	CreateFramebuffers(app);
 
 	app->scene.camera.transform.setPosition(vec3(0.0f, 0.0f, 10.0f));
 	app->scene.camera.transform.setRotation(vec3(0, 180, 0));
@@ -1216,6 +1221,11 @@ void RenderScreenQuad(App* app)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 }
 
+void RenderPostprocessing(App* app)
+{
+
+}
+
 void RenderGuizmos(App* app)
 {
 	for (const Light& light : app->scene.lights)
@@ -1283,6 +1293,8 @@ void Render(App* app)
 	app->displayFramebuffer.unbind();
 
 	RenderScreenQuad(app);
+
+	RenderPostprocessing(app);
 
 	if (app->showGuizmos) { RenderGuizmos(app); }
 

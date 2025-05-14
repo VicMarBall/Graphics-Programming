@@ -124,4 +124,4 @@ void Render(App* app);
 
 u32 LoadTexture2D(App* app, const char* filepath);
 
-void CreateScreenFramebuffers(App* app);
+void CreateFramebuffers(App* app);
