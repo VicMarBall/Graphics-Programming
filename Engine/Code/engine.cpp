@@ -1137,23 +1137,8 @@ void Update(App* app)
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Render(App* app)
+void RenderMeshes(App* app) 
 {
-	// render on this framebuffer render targets
-	app->displayFramebuffer.bind();
-	
-	// clear color and depth
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
-
-	glEnable(GL_DEPTH_TEST);
-	
-	// render meshes
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
 
 	for (const GameObject& gameObject : app->scene.gameObjects)
@@ -1185,9 +1170,10 @@ void Render(App* app)
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 		}
 	}
-	
-	app->displayFramebuffer.unbind();
+}
 
+void RenderScreenQuad(App* app) 
+{
 	// render plane on the viewport to put the texture form the framebuffer
 	Program& programTexturedGeometry = app->programs[app->screenQuadProgramIdx];
 	glUseProgram(programTexturedGeometry.handle);
@@ -1228,53 +1214,77 @@ void Render(App* app)
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+}
 
-	if (app->showGuizmos)
+void RenderGuizmos(App* app)
+{
+	for (const Light& light : app->scene.lights)
 	{
-		// draw gizmos
-		for (const Light& light : app->scene.lights)
+		// set the block of the uniform
+		u32 blockOffset = light.localUniformBufferHead;
+		u32 blockSize = light.localUniformBufferSize;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
+
+		// use the program
+		Program& meshProgram = app->programs[app->basicShapesProgramIdx];
+		glUseProgram(meshProgram.handle);
+
+		// draw the mesh
+		Model model;
+
+		switch (light.type)
 		{
-			// set the block of the uniform
-			u32 blockOffset = light.localUniformBufferHead;
-			u32 blockSize = light.localUniformBufferSize;
-			glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
+		case LightType_Directional:
+			model = app->models[app->planeIdx];
+			break;
+		case LightType_Point:
+			model = app->models[app->sphereIdx];
+			break;
+		default:
+			break;
+		}
 
-			// use the program
-			Program& meshProgram = app->programs[app->basicShapesProgramIdx];
-			glUseProgram(meshProgram.handle);
+		Mesh& mesh = app->meshes[model.meshIdx];
 
-			// draw the mesh
-			Model model;
+		for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+			GLuint vao = FindVAO(mesh, i, meshProgram);
+			glBindVertexArray(vao);
 
-			switch (light.type)
-			{
-			case LightType_Directional:
-				model = app->models[app->planeIdx];
-				break;
-			case LightType_Point:
-				model = app->models[app->sphereIdx];
-				break;
-			default:
-				break;
-			}
+			u32 submeshMaterialIdx = model.materialIdx[i];
+			Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-			Mesh& mesh = app->meshes[model.meshIdx];
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
 
-			for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
-				GLuint vao = FindVAO(mesh, i, meshProgram);
-				glBindVertexArray(vao);
-
-				u32 submeshMaterialIdx = model.materialIdx[i];
-				Material& submeshMaterial = app->materials[submeshMaterialIdx];
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-
-				Submesh& submesh = mesh.submeshes[i];
-				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-			}
+			Submesh& submesh = mesh.submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 		}
 	}
+}
+
+void Render(App* app)
+{
+	// render on this framebuffer render targets
+	app->displayFramebuffer.bind();
+	
+	// clear color and depth
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+	glEnable(GL_DEPTH_TEST);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	RenderMeshes(app);
+	
+	app->displayFramebuffer.unbind();
+
+	RenderScreenQuad(app);
+
+	if (app->showGuizmos) { RenderGuizmos(app); }
 
 	glBindVertexArray(0);
 	glUseProgram(0);
