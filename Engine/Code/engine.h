@@ -9,6 +9,7 @@
 #include "buffer.h"
 #include "framebuffer.h"
 #include "resources.h"
+#include "bloom.h"
 #include <glad/glad.h>
 
 enum FramebufferDisplayType
@@ -89,6 +90,9 @@ struct App
 	const unsigned char* glShadingLanguageVersion;
 	int glNumExtensions;
 	const unsigned char* glExtensions;
+
+	// postprocessing
+	BloomResources bloom;
 
 	// toggles
 	bool useBloom;

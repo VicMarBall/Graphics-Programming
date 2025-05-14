@@ -277,6 +277,7 @@ void CreateScreenFramebuffers(App* app)
 void CreateFramebuffers(App* app)
 {
 	CreateScreenFramebuffers(app);
+	app->bloom.Init(app->displaySize.x, app->displaySize.y);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {

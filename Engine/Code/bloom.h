@@ -1,6 +1,7 @@
 #pragma once
 #include "platform.h"
 #include "resources.h"
+#include "framebuffer.h"
 
 struct BloomResources
 {
@@ -11,10 +12,11 @@ struct BloomResources
 	// bloom mipmap
 	GLuint rtBright;
 	GLuint rtBloomH;
-	//to implement FramebufferObject as struct/class
-	//FramebufferObject* fboBloom1 = nullptr; 
-	//FramebufferObject* fboBloom2 = nullptr; 
-	//FramebufferObject* fboBloom3 = nullptr; 
-	//FramebufferObject* fboBloom4 = nullptr; 
-	//FramebufferObject* fboBloom5 = nullptr; 
+	FramebufferObject fboBloom1; 
+	FramebufferObject fboBloom2; 
+	FramebufferObject fboBloom3; 
+	FramebufferObject fboBloom4; 
+	FramebufferObject fboBloom5; 
+
+	void Init(const int& screenWidth, const int& screenHeight);
 };
