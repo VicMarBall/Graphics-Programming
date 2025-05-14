@@ -106,7 +106,7 @@ void OnGlfwResizeFramebuffer(GLFWwindow* window, int width, int height)
 {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 	app->displaySize = vec2(width, height);
-	CreateFrameBuffers(app);
+	CreateScreenFramebuffers(app);
 }
 
 void OnGlfwCloseWindow(GLFWwindow* window)
@@ -117,12 +117,7 @@ void OnGlfwCloseWindow(GLFWwindow* window)
 
 int main()
 {
-	App app         = {};
-	app.deltaTime   = 1.0f/60.0f;
-	app.displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
-	app.isRunning   = true;
-
-		glfwSetErrorCallback(OnGlfwError);
+	glfwSetErrorCallback(OnGlfwError);
 
 	if (!glfwInit())
 	{
@@ -141,8 +136,6 @@ int main()
 		ELOG("glfwCreateWindow() failed\n");
 		return -1;
 	}
-
-	glfwSetWindowUserPointer(window, &app);
 
 	glfwSetMouseButtonCallback(window, OnGlfwMouseEvent);
 	glfwSetCursorPosCallback(window, OnGlfwMouseMoveEvent);
@@ -199,6 +192,13 @@ int main()
 	f64 lastFrameTime = glfwGetTime();
 
 	GlobalFrameArenaMemory = (u8*)malloc(GLOBAL_FRAME_ARENA_SIZE);
+
+	App app = {};
+	app.deltaTime = 1.0f / 60.0f;
+	app.displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
+	app.isRunning = true;
+
+	glfwSetWindowUserPointer(window, &app);
 
 	Init(&app);
 

@@ -131,6 +131,9 @@
     <ClInclude Include="Code\bloom.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Code\framebuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\screen_quad.glsl">
