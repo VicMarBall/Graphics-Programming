@@ -90,6 +90,10 @@ struct App
 	int glNumExtensions;
 	const unsigned char* glExtensions;
 
+	// toggles
+	bool useBloom;
+	bool UIbloomSettings;
+
 	// imgui UI
 	bool showGuizmos;
 	bool UIshowInfo;

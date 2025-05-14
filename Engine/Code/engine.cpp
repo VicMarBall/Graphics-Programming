@@ -333,6 +333,7 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 void Init(App* app)
 {
 	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
+	app->useBloom = true;
 	app->showGuizmos = true;
 	app->UIshowInfo = false;
 	app->UIsceneHierarchy = true;
@@ -966,6 +967,12 @@ void Gui(App* app)
 		ImGui::End();
 	}
 
+	if (app->UIbloomSettings) {
+		ImGui::Begin("Bloom", &app->UIbloomSettings);
+
+		ImGui::End();
+	}
+
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("General")) {
 			
@@ -1020,6 +1027,13 @@ void Gui(App* app)
 				sphere.modelID = app->sphereIdx;
 				sphere.programID = app->basicShapesProgramIdx;
 			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Postprocessing")) {
+			ImGui::Checkbox("Bloom", &app->useBloom);
+			if (ImGui::MenuItem("Bloom Settings")) { app->UIbloomSettings = true; }
 
 			ImGui::EndMenu();
 		}
