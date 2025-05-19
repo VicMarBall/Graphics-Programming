@@ -36,3 +36,43 @@ void main()
 
 #endif
 #endif
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+#ifdef BLOOM
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec2 aTexCoord;
+
+out vec2 vTexCoord;
+
+void main()
+{
+	vTexCoord = aTexCoord;
+
+	gl_Position = vec4(aPosition, 1.0);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+uniform sampler2D colorMap;
+uniform int maxLOD;
+
+in vec2 vTexCoord;
+
+out vec4 outColor;
+
+void main()
+{
+	outColor = vec4(0.0);
+	for (int lod = 0; lod < maxLOD; ++lod)
+	{
+		outColor += textureLod(colorMap, texCoord, float(lod));
+	}
+	outColor.a = 1.0;
+}
+
+#endif
+#endif

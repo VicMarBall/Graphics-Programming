@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\bloom.glsl" />
+    <None Include="WorkingDir\blur.glsl" />
     <None Include="WorkingDir\deferred_mesh.glsl" />
     <None Include="WorkingDir\screen_quad.glsl" />
   </ItemGroup>

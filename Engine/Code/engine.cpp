@@ -340,6 +340,12 @@ void InitBloomPrograms(App* app)
 {
 	u32 blitIdx = LoadProgram(app, "bloom.glsl", "BLIT_BRIGHTEST_PIXELS");
 	app->bloom.blitBrightestPixelsProgram = &app->programs[blitIdx];
+
+	u32 blurIdx = LoadProgram(app, "blur.glsl", "BLUR");
+	app->bloom.blurProgram = &app->programs[blurIdx];
+
+	u32 bloomIdx = LoadProgram(app, "bloom.glsl", "BLOOM");
+	app->bloom.bloomProgram = &app->programs[bloomIdx];
 }
 
 void Init(App* app)
@@ -1232,12 +1238,56 @@ void RenderScreenQuad(App* app)
 
 void PassBloom(App* app, FramebufferObject& fbo, GLenum colorAttachment, GLuint inputTexture, int maxLOD)
 {
+	fbo.bind();
 
+	glDrawBuffer(colorAttachment);
+	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glUseProgram(app->bloom.bloomProgram->handle);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, inputTexture);
+	GLuint colorMapLocation = glGetUniformLocation(app->bloom.bloomProgram->handle, "colorMap");
+	glUniform1i(colorMapLocation, 0);
+	GLuint maxLODLocation = glGetUniformLocation(app->bloom.bloomProgram->handle, "maxLOD");
+	glUniform1i(maxLODLocation, maxLOD);
+
+	glBindVertexArray(app->quadVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	glUseProgram(0);
+
+	fbo.unbind();
 }
 
 void PassBlur(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, GLenum colorAttachment, GLuint inputTexture, GLint inputLOD, const glm::vec2& direction)
 {
+	fbo.bind();
+	glDrawBuffer(colorAttachment);
+	glViewport(0, 0, viewportSize.x, viewportSize.y);
 
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	glUseProgram(app->bloom.blurProgram->handle);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, inputTexture);
+	GLuint colorMapLocation = glGetUniformLocation(app->bloom.blurProgram->handle, "colorMap");
+	glUniform1i(colorMapLocation, 0);
+	GLuint inputLODLocation = glGetUniformLocation(app->bloom.blurProgram->handle, "inputLOD");
+	glUniform1i(inputLODLocation, inputLOD);
+	GLuint directionLocation = glGetUniformLocation(app->bloom.blurProgram->handle, "direction");
+	glUniform2f(directionLocation, direction.x, direction.y);
+
+	glBindVertexArray(app->quadVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	glUseProgram(0);
+
+	fbo.unbind();
 }
 
 void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, GLenum colorAttachment, GLuint inputTexture, GLint inputLOD, float threshold) 
@@ -1246,8 +1296,6 @@ void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& vie
 	glDrawBuffer(colorAttachment);
 
 	glViewport(0, 0, viewportSize.x, viewportSize.y);
-
-	glBindVertexArray(app->quadVAO);
 
 	glUseProgram(app->bloom.blitBrightestPixelsProgram->handle);
 	glActiveTexture(GL_TEXTURE0);
@@ -1258,9 +1306,9 @@ void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& vie
 	GLuint thresholdLocation = glGetUniformLocation(app->bloom.blitBrightestPixelsProgram->handle, "threshold");
 	glUniform1f(thresholdLocation, threshold);
 
+	glBindVertexArray(app->quadVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glUseProgram(0);
 }
 
@@ -1292,7 +1340,7 @@ void RenderBloom(App* app)
 	PassBlur(app, app->bloom.fboBloom4, glm::vec2(w / 16, h / 16), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(3), vertical);
 	PassBlur(app, app->bloom.fboBloom5, glm::vec2(w / 32, h / 32), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(4), vertical);
 
-	PassBloom(app, app->displayFramebuffer, GL_COLOR_ATTACHMENT3, app->bloom.rtBright, 4);
+	PassBloom(app, app->displayFramebuffer, GL_COLOR_ATTACHMENT0, app->bloom.rtBright, 4);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1355,6 +1403,9 @@ void Render(App* app)
 	// render on this framebuffer render targets
 	app->displayFramebuffer.bind();
 	
+	GLuint drawBuffers[] = { app->colorAttachmentHandle, app->normalAttachmentHandle };
+	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+
 	// clear color and depth
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
