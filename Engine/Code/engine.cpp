@@ -1423,7 +1423,7 @@ void Render(App* app)
 
 	RenderScreenQuad(app);
 
-	RenderPostprocessing(app);
+	//RenderPostprocessing(app);
 
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
