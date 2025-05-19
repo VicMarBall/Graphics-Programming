@@ -145,5 +145,8 @@
     <None Include="WorkingDir\deferred_mesh.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
+    <None Include="WorkingDir\bloom.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
   </ItemGroup>
 </Project>

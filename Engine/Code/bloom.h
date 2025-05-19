@@ -19,4 +19,7 @@ struct BloomResources
 	FramebufferObject fboBloom5; 
 
 	void Init(const int& screenWidth, const int& screenHeight);
+
+	// parameters
+	float threshold;
 };

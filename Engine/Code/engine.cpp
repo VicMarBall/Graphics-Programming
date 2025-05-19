@@ -336,6 +336,12 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 	return vaoHandle;
 }
 
+void InitBloomPrograms(App* app)
+{
+	u32 blitIdx = LoadProgram(app, "bloom.glsl", "BLIT_BRIGHTEST_PIXELS");
+	app->bloom.blitBrightestPixelsProgram = &app->programs[blitIdx];
+}
+
 void Init(App* app)
 {
 	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
@@ -358,6 +364,8 @@ void Init(App* app)
 	}
 
 	CreateFramebuffers(app);
+
+	InitBloomPrograms(app);
 
 	app->scene.camera.transform.setPosition(vec3(0.0f, 0.0f, 10.0f));
 	app->scene.camera.transform.setRotation(vec3(0, 180, 0));
@@ -1222,9 +1230,78 @@ void RenderScreenQuad(App* app)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 }
 
-void RenderPostprocessing(App* app)
+void PassBloom(App* app, FramebufferObject& fbo, GLenum colorAttachment, GLuint inputTexture, int maxLOD)
 {
 
+}
+
+void PassBlur(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, GLenum colorAttachment, GLuint inputTexture, GLint inputLOD, const glm::vec2& direction)
+{
+
+}
+
+void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, GLenum colorAttachment, GLuint inputTexture, GLint inputLOD, float threshold) 
+{
+	fbo.bind();
+	glDrawBuffer(colorAttachment);
+
+	glViewport(0, 0, viewportSize.x, viewportSize.y);
+
+	glBindVertexArray(app->quadVAO);
+
+	glUseProgram(app->bloom.blitBrightestPixelsProgram->handle);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, inputTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	GLuint colorTextureLocation = glGetUniformLocation(app->bloom.blitBrightestPixelsProgram->handle, "colorTexture");
+	glUniform1i(colorTextureLocation, 0);
+	GLuint thresholdLocation = glGetUniformLocation(app->bloom.blitBrightestPixelsProgram->handle, "threshold");
+	glUniform1f(thresholdLocation, threshold);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glUseProgram(0);
+}
+
+void RenderBloom(App* app)
+{
+#define LOD(x) x
+	const glm::vec2 horizontal = glm::vec2(1, 0);
+	const glm::vec2 vertical = glm::vec2(0, 1);
+
+	const float w = app->displaySize.x;
+	const float h = app->displaySize.y;
+
+	// get bright pixels
+	PassBlitBrightPixels(app, app->bloom.fboBloom1, glm::vec2(w * 0.5f, h * 0.5f), GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle, LOD(0), app->bloom.threshold);
+	glBindTexture(GL_TEXTURE_2D, app->bloom.rtBright);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// horizontal blur
+	PassBlur(app, app->bloom.fboBloom1, glm::vec2(w / 2, h / 2), GL_COLOR_ATTACHMENT1, app->bloom.rtBright, LOD(0), horizontal);
+	PassBlur(app, app->bloom.fboBloom2, glm::vec2(w / 4, h / 4), GL_COLOR_ATTACHMENT1, app->bloom.rtBright, LOD(1), horizontal);
+	PassBlur(app, app->bloom.fboBloom3, glm::vec2(w / 8, h / 8), GL_COLOR_ATTACHMENT1, app->bloom.rtBright, LOD(2), horizontal);
+	PassBlur(app, app->bloom.fboBloom4, glm::vec2(w / 16, h / 16), GL_COLOR_ATTACHMENT1, app->bloom.rtBright, LOD(3), horizontal);
+	PassBlur(app, app->bloom.fboBloom5, glm::vec2(w / 32, h / 32), GL_COLOR_ATTACHMENT1, app->bloom.rtBright, LOD(4), horizontal);
+
+	// vertical blur
+	PassBlur(app, app->bloom.fboBloom1, glm::vec2(w / 2, h / 2), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(0), vertical);
+	PassBlur(app, app->bloom.fboBloom2, glm::vec2(w / 4, h / 4), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(1), vertical);
+	PassBlur(app, app->bloom.fboBloom3, glm::vec2(w / 8, h / 8), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(2), vertical);
+	PassBlur(app, app->bloom.fboBloom4, glm::vec2(w / 16, h / 16), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(3), vertical);
+	PassBlur(app, app->bloom.fboBloom5, glm::vec2(w / 32, h / 32), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(4), vertical);
+
+	PassBloom(app, app->displayFramebuffer, GL_COLOR_ATTACHMENT3, app->bloom.rtBright, 4);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+#undef LOD
+}
+
+void RenderPostprocessing(App* app)
+{
+	if (app->useBloom) { RenderBloom(app); }
 }
 
 void RenderGuizmos(App* app)
@@ -1296,6 +1373,8 @@ void Render(App* app)
 	RenderScreenQuad(app);
 
 	RenderPostprocessing(app);
+
+	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
 	if (app->showGuizmos) { RenderGuizmos(app); }
 
