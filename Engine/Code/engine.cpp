@@ -266,12 +266,25 @@ void CreateScreenFramebuffers(App* app)
 	app->displayFramebuffer.addColorAttachment(GL_COLOR_ATTACHMENT2, app->positionAttachmentHandle);
 	app->displayFramebuffer.addColorAttachment(GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle);
 
-	GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-
 	app->displayFramebuffer.checkStatus();
 
-	glDrawBuffers(ARRAY_COUNT(buffers), buffers);
 	app->displayFramebuffer.unbind();
+
+	// final
+	glGenTextures(1, &app->finalAttachmentHandle);
+	glBindTexture(GL_TEXTURE_2D, app->finalAttachmentHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	app->finalFramebuffer.bind();
+	app->finalFramebuffer.addColorAttachment(GL_COLOR_ATTACHMENT0, app->finalAttachmentHandle);
+	app->finalFramebuffer.checkStatus();
+	app->finalFramebuffer.unbind();
 }
 
 void CreateFramebuffers(App* app)
@@ -436,6 +449,10 @@ void Init(App* app)
 		app->programUniformTextureNormals = glGetUniformLocation(texturedGeometryProgram.handle, "uNormals");
 		app->programUniformTexturePosition = glGetUniformLocation(texturedGeometryProgram.handle, "uPosition");
 		app->programUniformTextureDepth = glGetUniformLocation(texturedGeometryProgram.handle, "uDepth");
+
+		app->finalScreenQuadProgramIdx = LoadProgram(app, "screen_quad.glsl", "FINAL");
+		Program& finalScreenProgram = app->programs[app->finalScreenQuadProgramIdx];
+		app->programUniformFinalTexture = glGetUniformLocation(finalScreenProgram.handle, "uFinal");
 	}
 
 	// load basic shapes
@@ -1342,7 +1359,7 @@ void RenderBloom(App* app)
 	PassBlur(app, app->bloom.fboBloom4, glm::vec2(w / 16, h / 16), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(3), vertical);
 	PassBlur(app, app->bloom.fboBloom5, glm::vec2(w / 32, h / 32), GL_COLOR_ATTACHMENT0, app->bloom.rtBloomH, LOD(4), vertical);
 
-	PassBloom(app, app->displayFramebuffer, GL_COLOR_ATTACHMENT0, app->bloom.rtBright, 4);
+	PassBloom(app, app->finalFramebuffer, GL_COLOR_ATTACHMENT0, app->bloom.rtBright, 4);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1400,6 +1417,22 @@ void RenderGuizmos(App* app)
 	}
 }
 
+void RenderFinal(App* app)
+{
+	Program& programFinal = app->programs[app->finalScreenQuadProgramIdx];
+	glUseProgram(programFinal.handle);
+
+	glUniform1i(app->programUniformFinalTexture, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, app->finalAttachmentHandle);
+
+	glBindVertexArray(app->quadVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	glUseProgram(0);
+
+}
+
 void Render(App* app)
 {
 	// render on this framebuffer render targets
@@ -1423,11 +1456,18 @@ void Render(App* app)
 	
 	app->displayFramebuffer.unbind();
 
+	app->finalFramebuffer.bind();
 	RenderScreenQuad(app);
+	app->finalFramebuffer.unbind();
 
-	RenderPostprocessing(app);
+	if (app->framebufferToDisplay == FINAL) { RenderPostprocessing(app); }
+
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+	RenderFinal(app);
 
 	if (app->showGuizmos) { RenderGuizmos(app); }
 

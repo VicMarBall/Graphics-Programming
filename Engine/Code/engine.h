@@ -39,6 +39,7 @@ struct App
 
 	// program indices
 	u32 screenQuadProgramIdx;
+	u32 finalScreenQuadProgramIdx;
 
 	// scene
 	Scene scene;
@@ -82,6 +83,11 @@ struct App
 	GLuint normalAttachmentHandle;
 	GLuint positionAttachmentHandle;
 	GLuint depthAttachmentHandle;
+
+	// final framebuffer
+	FramebufferObject finalFramebuffer; // for postproduction
+	GLuint finalAttachmentHandle;
+	GLuint programUniformFinalTexture;
 
 	// info about OpenGL
 	const unsigned char* glVersion;
