@@ -69,7 +69,7 @@ void main()
 	outColor = vec4(0.0);
 	for (int lod = 0; lod < maxLOD; ++lod)
 	{
-		outColor += textureLod(colorMap, texCoord, float(lod));
+		outColor += textureLod(colorMap, vTexCoord, float(lod));
 	}
 	outColor.a = 1.0;
 }

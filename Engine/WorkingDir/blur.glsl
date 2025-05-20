@@ -44,10 +44,10 @@ void main()
 	for (int i = kernelBegin; i <= kernelEnd; ++i)
 	{
 		float currentWeight = smoothstep(float(kernelRadius), 0.0, float(abs(i)));
-		vec2 finalTexCoords = texCoords + i * direction * texelSize;
+		vec2 finalTexCoords = vTexCoord + (i * direction * texelSize);
 		finalTexCoords = clamp(finalTexCoords, margin1, margin2);
 		outColor += textureLod(colorMap, finalTexCoords, inputLOD) * currentWeight;
-		weight + = currentWeight;
+		weight += currentWeight;
 	}
 
 	outColor = outColor / weight;
