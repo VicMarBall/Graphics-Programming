@@ -352,9 +352,7 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 void InitBloomPrograms(App* app)
 {
 	app->bloom.blitBrightestPixelsProgramIdx = LoadProgram(app, "bloom.glsl", "BLIT_BRIGHTEST_PIXELS");
-
 	app->bloom.blurProgramIdx = LoadProgram(app, "blur.glsl", "BLUR");
-
 	app->bloom.bloomProgramIdx = LoadProgram(app, "bloom.glsl", "BLOOM");
 }
 
