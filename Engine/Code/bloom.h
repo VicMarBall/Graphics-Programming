@@ -5,9 +5,9 @@
 
 struct BloomResources
 {
-	Program* blitBrightestPixelsProgram = nullptr;
-	Program* blurProgram = nullptr;
-	Program* bloomProgram = nullptr;
+	u32 blitBrightestPixelsProgramIdx;
+	u32 blurProgramIdx;
+	u32 bloomProgramIdx;
 
 	// bloom mipmap
 	GLuint rtBright;

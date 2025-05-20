@@ -351,14 +351,11 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 
 void InitBloomPrograms(App* app)
 {
-	u32 blitIdx = LoadProgram(app, "bloom.glsl", "BLIT_BRIGHTEST_PIXELS");
-	app->bloom.blitBrightestPixelsProgram = &app->programs[blitIdx];
+	app->bloom.blitBrightestPixelsProgramIdx = LoadProgram(app, "bloom.glsl", "BLIT_BRIGHTEST_PIXELS");
 
-	u32 blurIdx = LoadProgram(app, "blur.glsl", "BLUR");
-	app->bloom.blurProgram = &app->programs[blurIdx];
+	app->bloom.blurProgramIdx = LoadProgram(app, "blur.glsl", "BLUR");
 
-	u32 bloomIdx = LoadProgram(app, "bloom.glsl", "BLOOM");
-	app->bloom.bloomProgram = &app->programs[bloomIdx];
+	app->bloom.bloomProgramIdx = LoadProgram(app, "bloom.glsl", "BLOOM");
 }
 
 void Init(App* app)
@@ -1266,12 +1263,12 @@ void PassBloom(App* app, FramebufferObject& fbo, GLenum colorAttachment, GLuint 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
-	glUseProgram(app->bloom.bloomProgram->handle);
+	glUseProgram(app->programs[app->bloom.bloomProgramIdx].handle);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, inputTexture);
-	GLuint colorMapLocation = glGetUniformLocation(app->bloom.bloomProgram->handle, "colorMap");
+	GLuint colorMapLocation = glGetUniformLocation(app->programs[app->bloom.bloomProgramIdx].handle, "colorMap");
 	glUniform1i(colorMapLocation, 0);
-	GLuint maxLODLocation = glGetUniformLocation(app->bloom.bloomProgram->handle, "maxLOD");
+	GLuint maxLODLocation = glGetUniformLocation(app->programs[app->bloom.bloomProgramIdx].handle, "maxLOD");
 	glUniform1i(maxLODLocation, maxLOD);
 
 	glBindVertexArray(app->quadVAO);
@@ -1291,14 +1288,14 @@ void PassBlur(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, G
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	glUseProgram(app->bloom.blurProgram->handle);
+	glUseProgram(app->programs[app->bloom.blurProgramIdx].handle);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, inputTexture);
-	GLuint colorMapLocation = glGetUniformLocation(app->bloom.blurProgram->handle, "colorMap");
+	GLuint colorMapLocation = glGetUniformLocation(app->programs[app->bloom.blurProgramIdx].handle, "colorMap");
 	glUniform1i(colorMapLocation, 0);
-	GLuint inputLODLocation = glGetUniformLocation(app->bloom.blurProgram->handle, "inputLOD");
+	GLuint inputLODLocation = glGetUniformLocation(app->programs[app->bloom.blurProgramIdx].handle, "inputLOD");
 	glUniform1i(inputLODLocation, inputLOD);
-	GLuint directionLocation = glGetUniformLocation(app->bloom.blurProgram->handle, "direction");
+	GLuint directionLocation = glGetUniformLocation(app->programs[app->bloom.blurProgramIdx].handle, "direction");
 	glUniform2f(directionLocation, direction.x, direction.y);
 
 	glBindVertexArray(app->quadVAO);
@@ -1316,13 +1313,13 @@ void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& vie
 
 	glViewport(0, 0, viewportSize.x, viewportSize.y);
 
-	glUseProgram(app->bloom.blitBrightestPixelsProgram->handle);
+	glUseProgram(app->programs[app->bloom.blitBrightestPixelsProgramIdx].handle);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, inputTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	GLuint colorTextureLocation = glGetUniformLocation(app->bloom.blitBrightestPixelsProgram->handle, "colorTexture");
+	GLuint colorTextureLocation = glGetUniformLocation(app->programs[app->bloom.blitBrightestPixelsProgramIdx].handle, "colorTexture");
 	glUniform1i(colorTextureLocation, 0);
-	GLuint thresholdLocation = glGetUniformLocation(app->bloom.blitBrightestPixelsProgram->handle, "threshold");
+	GLuint thresholdLocation = glGetUniformLocation(app->programs[app->bloom.blitBrightestPixelsProgramIdx].handle, "threshold");
 	glUniform1f(thresholdLocation, threshold);
 
 	glBindVertexArray(app->quadVAO);
