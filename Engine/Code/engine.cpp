@@ -990,6 +990,8 @@ void Gui(App* app)
 	if (app->UIbloomSettings) {
 		ImGui::Begin("Bloom", &app->UIbloomSettings);
 
+		ImGui::SliderFloat("Threshold", &app->bloom.threshold, 0, 10);
+
 		ImGui::End();
 	}
 
@@ -1403,8 +1405,8 @@ void Render(App* app)
 	// render on this framebuffer render targets
 	app->displayFramebuffer.bind();
 	
-	GLuint drawBuffers[] = { app->colorAttachmentHandle, app->normalAttachmentHandle };
-	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+	GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(ARRAY_COUNT(buffers), buffers);
 
 	// clear color and depth
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -1423,7 +1425,7 @@ void Render(App* app)
 
 	RenderScreenQuad(app);
 
-	//RenderPostprocessing(app);
+	RenderPostprocessing(app);
 
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
