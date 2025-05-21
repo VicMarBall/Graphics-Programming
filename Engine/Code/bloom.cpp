@@ -37,32 +37,32 @@ void BloomResources::Init(const int& screenWidth, const int& screenHeight)
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	fboBloom1.bind();
-	fboBloom1.addColorAttachment(0, rtBright, 0);
-	fboBloom1.addColorAttachment(1, rtBloomH, 0);
+	fboBloom1.addColorAttachment(GL_COLOR_ATTACHMENT0, rtBright, 0);
+	fboBloom1.addColorAttachment(GL_COLOR_ATTACHMENT1, rtBloomH, 0);
 	fboBloom1.checkStatus();
 	fboBloom1.unbind();
 
 	fboBloom2.bind();
-	fboBloom2.addColorAttachment(0, rtBright, 1);
-	fboBloom2.addColorAttachment(1, rtBloomH, 1);
+	fboBloom2.addColorAttachment(GL_COLOR_ATTACHMENT0, rtBright, 1);
+	fboBloom2.addColorAttachment(GL_COLOR_ATTACHMENT1, rtBloomH, 1);
 	fboBloom2.checkStatus();
 	fboBloom2.unbind();
 
 	fboBloom3.bind();
-	fboBloom3.addColorAttachment(0, rtBright, 2);
-	fboBloom3.addColorAttachment(1, rtBloomH, 2);
+	fboBloom3.addColorAttachment(GL_COLOR_ATTACHMENT0, rtBright, 2);
+	fboBloom3.addColorAttachment(GL_COLOR_ATTACHMENT1, rtBloomH, 2);
 	fboBloom3.checkStatus();
 	fboBloom3.unbind();
 
 	fboBloom4.bind();
-	fboBloom4.addColorAttachment(0, rtBright, 3);
-	fboBloom4.addColorAttachment(1, rtBloomH, 3);
+	fboBloom4.addColorAttachment(GL_COLOR_ATTACHMENT0, rtBright, 3);
+	fboBloom4.addColorAttachment(GL_COLOR_ATTACHMENT1, rtBloomH, 3);
 	fboBloom4.checkStatus();
 	fboBloom4.unbind();
 
 	fboBloom5.bind();
-	fboBloom5.addColorAttachment(0, rtBright, 4);
-	fboBloom5.addColorAttachment(1, rtBloomH, 4);
+	fboBloom5.addColorAttachment(GL_COLOR_ATTACHMENT0, rtBright, 4);
+	fboBloom5.addColorAttachment(GL_COLOR_ATTACHMENT1, rtBloomH, 4);
 	fboBloom5.checkStatus();
 	fboBloom5.unbind();
 }

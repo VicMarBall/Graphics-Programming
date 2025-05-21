@@ -1311,6 +1311,9 @@ void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& vie
 
 	glViewport(0, 0, viewportSize.x, viewportSize.y);
 
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
 	glUseProgram(app->programs[app->bloom.blitBrightestPixelsProgramIdx].handle);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, inputTexture);
@@ -1322,6 +1325,8 @@ void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& vie
 
 	glBindVertexArray(app->quadVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	glUseProgram(0);
 }
@@ -1336,7 +1341,7 @@ void RenderBloom(App* app)
 	const float h = app->displaySize.y;
 
 	// get bright pixels
-	PassBlitBrightPixels(app, app->bloom.fboBloom1, glm::vec2(w * 0.5f, h * 0.5f), GL_COLOR_ATTACHMENT0, app->colorAttachmentHandle, LOD(0), app->bloom.threshold);
+	PassBlitBrightPixels(app, app->bloom.fboBloom1, glm::vec2(w * 0.5f, h * 0.5f), GL_COLOR_ATTACHMENT0, app->finalAttachmentHandle, LOD(0), app->bloom.threshold);
 	glBindTexture(GL_TEXTURE_2D, app->bloom.rtBright);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
