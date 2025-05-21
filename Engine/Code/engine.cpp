@@ -1002,18 +1002,19 @@ void Gui(App* app)
 	if (app->UIbloomSettings) {
 		ImGui::Begin("Bloom", &app->UIbloomSettings);
 
-		if (ImGui::DragFloat("Threshold", &app->bloom.threshold, 0.01f, 0.0f, 0.0f, "%.2f"))
-		{
-			if (app->bloom.threshold < 0)
-			{
+		if (ImGui::DragFloat("Threshold", &app->bloom.threshold, 0.01f, 0.0f, 0.0f, "%.2f")) {
+			if (app->bloom.threshold < 0) {
 				app->bloom.threshold = 0;
 			}
 		}
-		if (ImGui::DragFloat("Intensity", &app->bloom.intensity, 0.01f, 0.0f, 0.0f, "%.2f")) 
-		{ 
-			if (app->bloom.intensity < 0) 
-			{
+		if (ImGui::DragFloat("Intensity", &app->bloom.intensity, 0.01f, 0.0f, 0.0f, "%.2f")) { 
+			if (app->bloom.intensity < 0) {
 				app->bloom.intensity = 0;
+			}
+		}
+		if (ImGui::DragInt("Kernel Radius", &app->bloom.kernelRadius)) {
+			if (app->bloom.kernelRadius < 1) {
+				app->bloom.kernelRadius = 1;
 			}
 		}
 
@@ -1310,6 +1311,8 @@ void PassBlur(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, G
 	glUniform1i(inputLODLocation, inputLOD);
 	GLuint directionLocation = glGetUniformLocation(app->programs[app->bloom.blurProgramIdx].handle, "direction");
 	glUniform2f(directionLocation, direction.x, direction.y);
+	GLuint kernelRadiusLocation = glGetUniformLocation(app->programs[app->bloom.blurProgramIdx].handle, "kernelRadius");
+	glUniform1i(kernelRadiusLocation, app->bloom.kernelRadius);
 
 	glBindVertexArray(app->quadVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);

@@ -23,4 +23,5 @@ struct BloomResources
 	// parameters
 	float threshold = 1.0f;
 	float intensity = 1.0f;
+	int kernelRadius = 16;
 };

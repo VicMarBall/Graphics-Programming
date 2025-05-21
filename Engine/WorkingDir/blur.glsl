@@ -19,6 +19,7 @@ void main()
 uniform sampler2D colorMap;
 uniform vec2 direction;
 uniform int inputLOD;
+uniform int kernelRadius;
 
 in vec2 vTexCoord;
 
@@ -37,7 +38,6 @@ void main()
 	int coord = int(directionFragCoord.x + directionFragCoord.y);
 	vec2 directionTexSize = texSize * direction;
 	int size = int(directionTexSize.x + directionTexSize.y);
-	int kernelRadius = 24;
 	int kernelBegin = -min(kernelRadius, coord);
 	int kernelEnd = min(kernelRadius, size - coord);
 	float weight = 0.0;
