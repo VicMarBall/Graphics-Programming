@@ -1003,6 +1003,7 @@ void Gui(App* app)
 		ImGui::Begin("Bloom", &app->UIbloomSettings);
 
 		ImGui::SliderFloat("Threshold", &app->bloom.threshold, 0, 10);
+		ImGui::SliderFloat("Intensity", &app->bloom.intensity, 0, 10);
 
 		ImGui::End();
 	}
@@ -1268,6 +1269,8 @@ void PassBloom(App* app, FramebufferObject& fbo, GLenum colorAttachment, GLuint 
 	glUniform1i(colorMapLocation, 0);
 	GLuint maxLODLocation = glGetUniformLocation(app->programs[app->bloom.bloomProgramIdx].handle, "maxLOD");
 	glUniform1i(maxLODLocation, maxLOD);
+	GLuint intensityLocation = glGetUniformLocation(app->programs[app->bloom.bloomProgramIdx].handle, "intensity");
+	glUniform1f(intensityLocation, app->bloom.intensity);
 
 	glBindVertexArray(app->quadVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);

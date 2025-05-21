@@ -59,6 +59,7 @@ void main()
 
 uniform sampler2D colorMap;
 uniform int maxLOD;
+uniform float intensity;
 
 in vec2 vTexCoord;
 
@@ -69,7 +70,7 @@ void main()
 	outColor = vec4(0.0);
 	for (int lod = 0; lod < maxLOD; ++lod)
 	{
-		outColor += textureLod(colorMap, vTexCoord, float(lod));
+		outColor += textureLod(colorMap, vTexCoord, float(lod)) * intensity;
 	}
 	outColor.a = 1.0;
 }
