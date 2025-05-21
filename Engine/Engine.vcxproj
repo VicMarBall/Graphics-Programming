@@ -23,6 +23,7 @@
     <ClCompile Include="Code\buffer.cpp" />
     <ClCompile Include="Code\engine.cpp" />
     <ClCompile Include="Code\platform.cpp" />
+    <ClCompile Include="Code\water.cpp" />
     <ClCompile Include="ThirdParty\glad\include\glad\glad.c" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui_demo.cpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="Code\game_object.h" />
     <ClInclude Include="Code\light.h" />
     <ClInclude Include="Code\framebuffer.h" />
+    <ClInclude Include="Code\water.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\khrplatform.h" />
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h" />

@@ -66,6 +66,9 @@
     <ClCompile Include="Code\bloom.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Code\water.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -135,6 +138,9 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Code\framebuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\water.h">
       <Filter>Engine</Filter>
     </ClInclude>
   </ItemGroup>
