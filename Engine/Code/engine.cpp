@@ -217,7 +217,7 @@ void CreateScreenFramebuffers(App* app)
 	// color
 	glGenTextures(1, &app->colorAttachmentHandle);
 	glBindTexture(GL_TEXTURE_2D, app->colorAttachmentHandle);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -273,7 +273,7 @@ void CreateScreenFramebuffers(App* app)
 	// final
 	glGenTextures(1, &app->finalAttachmentHandle);
 	glBindTexture(GL_TEXTURE_2D, app->finalAttachmentHandle);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -1002,8 +1002,20 @@ void Gui(App* app)
 	if (app->UIbloomSettings) {
 		ImGui::Begin("Bloom", &app->UIbloomSettings);
 
-		ImGui::SliderFloat("Threshold", &app->bloom.threshold, 0, 10);
-		ImGui::SliderFloat("Intensity", &app->bloom.intensity, 0, 10);
+		if (ImGui::DragFloat("Threshold", &app->bloom.threshold, 0.01f, 0.0f, 0.0f, "%.2f"))
+		{
+			if (app->bloom.threshold < 0)
+			{
+				app->bloom.threshold = 0;
+			}
+		}
+		if (ImGui::DragFloat("Intensity", &app->bloom.intensity, 0.01f, 0.0f, 0.0f, "%.2f")) 
+		{ 
+			if (app->bloom.intensity < 0) 
+			{
+				app->bloom.intensity = 0;
+			}
+		}
 
 		ImGui::End();
 	}
