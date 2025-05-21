@@ -1230,7 +1230,7 @@ void RenderScreenQuad(App* app)
 	glDisable(GL_DEPTH_TEST);
 
 	// clear color and depth
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUniform1ui(app->programCurrentFramebufferLocation, app->framebufferToDisplay);
@@ -1460,7 +1460,7 @@ void Render(App* app)
 	glDrawBuffers(ARRAY_COUNT(buffers), buffers);
 
 	// clear color and depth
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
@@ -1480,7 +1480,7 @@ void Render(App* app)
 
 	if (app->framebufferToDisplay == FINAL) { RenderPostprocessing(app); }
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
