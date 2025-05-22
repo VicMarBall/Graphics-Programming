@@ -33,10 +33,10 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 		programSource.str
 	};
 	const GLint vertexShaderLengths[] = {
-		(GLint) strlen(versionString),
-		(GLint) strlen(shaderNameDefine),
-		(GLint) strlen(vertexShaderDefine),
-		(GLint) programSource.len
+		(GLint)strlen(versionString),
+		(GLint)strlen(shaderNameDefine),
+		(GLint)strlen(vertexShaderDefine),
+		(GLint)programSource.len
 	};
 	const GLchar* fragmentShaderSource[] = {
 		versionString,
@@ -45,10 +45,10 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 		programSource.str
 	};
 	const GLint fragmentShaderLengths[] = {
-		(GLint) strlen(versionString),
-		(GLint) strlen(shaderNameDefine),
-		(GLint) strlen(fragmentShaderDefine),
-		(GLint) programSource.len
+		(GLint)strlen(versionString),
+		(GLint)strlen(shaderNameDefine),
+		(GLint)strlen(fragmentShaderDefine),
+		(GLint)programSource.len
 	};
 
 	GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
@@ -161,14 +161,14 @@ void FreeImage(Image image)
 GLuint CreateTexture2DFromImage(Image image)
 {
 	GLenum internalFormat = GL_RGB8;
-	GLenum dataFormat     = GL_RGB;
-	GLenum dataType       = GL_UNSIGNED_BYTE;
+	GLenum dataFormat = GL_RGB;
+	GLenum dataType = GL_UNSIGNED_BYTE;
 
 	switch (image.nchannels)
 	{
-		case 3: dataFormat = GL_RGB; internalFormat = GL_RGB8; break;
-		case 4: dataFormat = GL_RGBA; internalFormat = GL_RGBA8; break;
-		default: ELOG("LoadTexture2D() - Unsupported number of channels");
+	case 3: dataFormat = GL_RGB; internalFormat = GL_RGB8; break;
+	case 4: dataFormat = GL_RGBA; internalFormat = GL_RGBA8; break;
+	default: ELOG("LoadTexture2D() - Unsupported number of channels");
 	}
 
 	GLuint texHandle;
@@ -291,6 +291,7 @@ void CreateFramebuffers(App* app)
 {
 	CreateScreenFramebuffers(app);
 	app->bloom.Init(app->displaySize.x, app->displaySize.y);
+	app->water.Init(app->displaySize.x, app->displaySize.y);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
@@ -314,11 +315,11 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
 
 		// link all vertex input attributes to attributes in the vertex buffer
-		for (u32 i = 0; i < program.vertexInputLayout.attributes.size(); ++i) 
+		for (u32 i = 0; i < program.vertexInputLayout.attributes.size(); ++i)
 		{
 			bool attributeIsLinked = false;
 
-			for (u32 j = 0; j < submesh.vertexBufferLayout.attributes.size(); ++j) 
+			for (u32 j = 0; j < submesh.vertexBufferLayout.attributes.size(); ++j)
 			{
 				if (program.vertexInputLayout.attributes[i].location == submesh.vertexBufferLayout.attributes[j].location)
 				{
@@ -356,6 +357,12 @@ void InitBloomPrograms(App* app)
 	app->bloom.bloomProgramIdx = LoadProgram(app, "bloom.glsl", "BLOOM");
 }
 
+void InitWaterPrograms(App* app)
+{
+	app->water.reflectionProgramIdx = LoadProgram(app, "", "");
+	app->water.refractionProgramIdx = LoadProgram(app, "", "");
+}
+
 void Init(App* app)
 {
 	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
@@ -380,6 +387,7 @@ void Init(App* app)
 	CreateFramebuffers(app);
 
 	InitBloomPrograms(app);
+	InitWaterPrograms(app);
 
 	app->scene.camera.transform.setPosition(vec3(0.0f, 0.0f, 10.0f));
 	app->scene.camera.transform.setRotation(vec3(0, 180, 0));
@@ -580,19 +588,19 @@ void Init(App* app)
 				// process indices (CHANGE MANUALLY)
 				indices.push_back(0);	indices.push_back(1);	indices.push_back(2);
 				indices.push_back(3);	indices.push_back(1);	indices.push_back(2);
-				
+
 				indices.push_back(0);	indices.push_back(1);	indices.push_back(4);
 				indices.push_back(5);	indices.push_back(1);	indices.push_back(4);
-				
+
 				indices.push_back(3);	indices.push_back(2);	indices.push_back(7);
 				indices.push_back(6);	indices.push_back(2);	indices.push_back(7);
-				
+
 				indices.push_back(1);	indices.push_back(3);	indices.push_back(5);
 				indices.push_back(7);	indices.push_back(3);	indices.push_back(5);
-				
+
 				indices.push_back(0);	indices.push_back(2);	indices.push_back(4);
 				indices.push_back(6);	indices.push_back(2);	indices.push_back(4);
-				
+
 				indices.push_back(4);	indices.push_back(5);	indices.push_back(6);
 				indices.push_back(7);	indices.push_back(5);	indices.push_back(6);
 
@@ -690,21 +698,21 @@ void Init(App* app)
 						vertices.push_back(sinf(angleh) * cosf(anglev));	// x
 						vertices.push_back(-sinf(anglev));					// y
 						vertices.push_back(cosf(angleh) * cosf(anglev));	// z
-						vertices.push_back(sinf(angleh)* cosf(anglev));		// normal.x == x
+						vertices.push_back(sinf(angleh) * cosf(anglev));		// normal.x == x
 						vertices.push_back(-sinf(anglev));					// normal.y == y
-						vertices.push_back(cosf(angleh)* cosf(anglev));		// normal.z == z
+						vertices.push_back(cosf(angleh) * cosf(anglev));		// normal.z == z
 					}
 				}
 
 				// process indices (CHANGE MANUALLY)
 				for (int h = 0; h < H; ++h) {
 					for (int v = 0; v < V + 1; ++v) {
-						indices.push_back(	(h + 0)			* (V + 1)	+ v);
-						indices.push_back(	((h + 1) % H)	* (V + 1)	+ v);
-						indices.push_back(	((h + 1) % H)	* (V + 1)	+ v+1);
-						indices.push_back(	(h + 0)			* (V + 1)	+ v);
-						indices.push_back(	((h + 1) % H)	* (V + 1)	+ v+1);
-						indices.push_back(	(h + 0)			* (V + 1)	+ v+1);
+						indices.push_back((h + 0) * (V + 1) + v);
+						indices.push_back(((h + 1) % H) * (V + 1) + v);
+						indices.push_back(((h + 1) % H) * (V + 1) + v + 1);
+						indices.push_back((h + 0) * (V + 1) + v);
+						indices.push_back(((h + 1) % H) * (V + 1) + v + 1);
+						indices.push_back((h + 0) * (V + 1) + v + 1);
 					}
 				}
 
@@ -814,7 +822,7 @@ void Init(App* app)
 	//int uniformBlockAlignment;
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
-	
+
 	// regular lights
 	{
 		Light light1;
@@ -822,15 +830,15 @@ void Init(App* app)
 		light1.color = vec3(1.0f, 1.0f, 0.0f);
 		light1.transform.setPosition(vec3(0.0f, 2.0f, -1.0f));
 		light1.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
-	
+
 		app->scene.lights.push_back(light1);
-	
+
 		Light light2;
 		light2.type = LightType_Directional;
 		light2.color = vec3(1.0f, 1.0f, 1.0f);
 		light2.transform.setRotation(vec3(170, 0, 0));
 		light2.transform.setScale(vec3(0.2f, 0.2f, 0.2f));
-	
+
 		app->scene.lights.push_back(light2);
 
 		Light light3;
@@ -888,7 +896,7 @@ void Init(App* app)
 	//		app->scene.lights.push_back(light);
 	//	}
 	//}
-	
+
 	// for each buffer you need
 
 	app->uniformsBuffer = CreateBuffer(maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STREAM_DRAW);
@@ -1007,7 +1015,7 @@ void Gui(App* app)
 				app->bloom.threshold = 0;
 			}
 		}
-		if (ImGui::DragFloat("Intensity", &app->bloom.intensity, 0.01f, 0.0f, 0.0f, "%.2f")) { 
+		if (ImGui::DragFloat("Intensity", &app->bloom.intensity, 0.01f, 0.0f, 0.0f, "%.2f")) {
 			if (app->bloom.intensity < 0) {
 				app->bloom.intensity = 0;
 			}
@@ -1023,7 +1031,7 @@ void Gui(App* app)
 
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("General")) {
-			
+
 			if (ImGui::MenuItem("Info")) { app->UIshowInfo = true; }
 
 			ImGui::EndMenu();
@@ -1038,8 +1046,8 @@ void Gui(App* app)
 			if (ImGui::BeginCombo("Framebuffer To Display", framebufferToDisplayOptions[app->framebufferToDisplay])) {
 				for (int n = 0; n < IM_ARRAYSIZE(framebufferToDisplayOptions); n++) {
 					if (ImGui::Selectable(framebufferToDisplayOptions[n], app->framebufferToDisplay == n))
-					{	
-						app->framebufferToDisplay = (FramebufferDisplayType)n;	
+					{
+						app->framebufferToDisplay = (FramebufferDisplayType)n;
 					}
 				}
 
@@ -1051,7 +1059,7 @@ void Gui(App* app)
 
 		if (ImGui::BeginMenu("Basic Shapes")) {
 
-			if (ImGui::MenuItem("Add Plane")) 
+			if (ImGui::MenuItem("Add Plane"))
 			{
 				app->scene.gameObjects.push_back(GameObject());
 				GameObject& plane = app->scene.gameObjects.back();
@@ -1059,7 +1067,7 @@ void Gui(App* app)
 				plane.modelID = app->planeIdx;
 				plane.programID = app->basicShapesProgramIdx;
 			}
-			if (ImGui::MenuItem("Add Cube")) 
+			if (ImGui::MenuItem("Add Cube"))
 			{
 				app->scene.gameObjects.push_back(GameObject());
 				GameObject& cube = app->scene.gameObjects.back();
@@ -1067,8 +1075,8 @@ void Gui(App* app)
 				cube.modelID = app->cubeIdx;
 				cube.programID = app->basicShapesProgramIdx;
 			}
-			if (ImGui::MenuItem("Add Sphere")) 
-			{ 
+			if (ImGui::MenuItem("Add Sphere"))
+			{
 				app->scene.gameObjects.push_back(GameObject());
 				GameObject& sphere = app->scene.gameObjects.back();
 
@@ -1106,10 +1114,10 @@ void Update(App* app)
 	float cameraSpeed = 0.1f;
 
 	glm::mat4 cameraMatrix = app->scene.camera.transform.getTransformationMatrix();
-	
+
 	// camera translation
-	if (app->input.keys[K_W]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + ( vec3(cameraMatrix[2]) * cameraSpeed)); }
-	if (app->input.keys[K_A]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + ( vec3(cameraMatrix[0]) * cameraSpeed)); }
+	if (app->input.keys[K_W]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + (vec3(cameraMatrix[2]) * cameraSpeed)); }
+	if (app->input.keys[K_A]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + (vec3(cameraMatrix[0]) * cameraSpeed)); }
 	if (app->input.keys[K_S]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + (-vec3(cameraMatrix[2]) * cameraSpeed)); }
 	if (app->input.keys[K_D]) { app->scene.camera.transform.setPosition(app->scene.camera.transform.getPosition() + (-vec3(cameraMatrix[0]) * cameraSpeed)); }
 
@@ -1138,7 +1146,7 @@ void Update(App* app)
 	PushVec3(app->uniformsBuffer, app->scene.camera.transform.getPosition());
 	PushUInt(app->uniformsBuffer, app->scene.lights.size());
 
-	for (Light& light : app->scene.lights) 
+	for (Light& light : app->scene.lights)
 	{
 		AlignHead(app->uniformsBuffer, sizeof(vec4));
 
@@ -1153,7 +1161,7 @@ void Update(App* app)
 
 
 	// prepare the local uniforms
-	for (GameObject& gameObject : app->scene.gameObjects) 
+	for (GameObject& gameObject : app->scene.gameObjects)
 	{
 		AlignHead(app->uniformsBuffer, app->uniformBlockAlignment);
 
@@ -1185,7 +1193,7 @@ void Update(App* app)
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void RenderMeshes(App* app) 
+void RenderMeshes(App* app)
 {
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
 
@@ -1220,7 +1228,7 @@ void RenderMeshes(App* app)
 	}
 }
 
-void RenderScreenQuad(App* app) 
+void RenderScreenQuad(App* app)
 {
 	// render plane on the viewport to put the texture form the framebuffer
 	Program& programTexturedGeometry = app->programs[app->screenQuadProgramIdx];
@@ -1322,7 +1330,7 @@ void PassBlur(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, G
 	fbo.unbind();
 }
 
-void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, GLenum colorAttachment, GLuint inputTexture, GLint inputLOD, float threshold) 
+void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& viewportSize, GLenum colorAttachment, GLuint inputTexture, GLint inputLOD, float threshold)
 {
 	fbo.bind();
 	glDrawBuffer(colorAttachment);
@@ -1382,6 +1390,11 @@ void RenderBloom(App* app)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #undef LOD
+}
+
+void RenderWater(App* app)
+{
+
 }
 
 void RenderPostprocessing(App* app)
@@ -1455,7 +1468,7 @@ void Render(App* app)
 {
 	// render on this framebuffer render targets
 	app->displayFramebuffer.bind();
-	
+
 	GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 	glDrawBuffers(ARRAY_COUNT(buffers), buffers);
 
@@ -1466,12 +1479,12 @@ void Render(App* app)
 	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
 	glEnable(GL_DEPTH_TEST);
-	
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	RenderMeshes(app);
-	
+
 	app->displayFramebuffer.unbind();
 
 	app->finalFramebuffer.bind();

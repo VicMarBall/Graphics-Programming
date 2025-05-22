@@ -10,6 +10,7 @@
 #include "framebuffer.h"
 #include "resources.h"
 #include "bloom.h"
+#include "water.h"
 #include <glad/glad.h>
 
 enum FramebufferDisplayType
@@ -99,7 +100,8 @@ struct App
 
 	// postprocessing
 	BloomResources bloom;
-
+	WaterResources water;
+	
 	// toggles
 	bool useBloom;
 	bool UIbloomSettings;

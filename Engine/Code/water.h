@@ -5,6 +5,7 @@
 
 class WaterResources
 {
+public:
 	u32 reflectionProgramIdx;
 	u32 refractionProgramIdx;
 
