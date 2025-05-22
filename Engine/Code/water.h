@@ -8,14 +8,14 @@ struct WaterResources
 	u32 reflectionProgramIdx;
 	u32 refractionProgramIdx;
 
-	GLuint reflectionRenderTarget = 0;
-	GLuint refractionRenderTarget = 0;
+	GLuint rtReflection = 0;
+	GLuint rtRefraction = 0;
 
-	GLuint reflectionDepthRenderTarget = 0;
-	GLuint refractionDepthRenderTarget = 0;
+	GLuint rtReflectionDepth = 0;
+	GLuint rtRefractionDepth = 0;
 
-	FramebufferObject* fboReflection = nullptr;
-	FramebufferObject* fboRefraction = nullptr;
+	FramebufferObject fboReflection;
+	FramebufferObject fboRefraction;
 
 	void Init(const int& screenWidth, const int& screenHeight);
 };
