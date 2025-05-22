@@ -3,9 +3,8 @@
 #include "resources.h"
 #include "framebuffer.h"
 
-class WaterResources
+struct WaterResources
 {
-public:
 	u32 reflectionProgramIdx;
 	u32 refractionProgramIdx;
 
