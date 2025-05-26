@@ -5,8 +5,7 @@
 
 struct WaterResources
 {
-	u32 reflectionProgramIdx;
-	u32 refractionProgramIdx;
+	u32 waterProgramIdx;
 
 	GLuint rtReflection = 0;
 	GLuint rtRefraction = 0;

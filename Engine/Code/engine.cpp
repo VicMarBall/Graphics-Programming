@@ -357,10 +357,9 @@ void InitBloomPrograms(App* app)
 	app->bloom.bloomProgramIdx = LoadProgram(app, "bloom.glsl", "BLOOM");
 }
 
-void InitWaterPrograms(App* app)
+void InitWaterProgram(App* app)
 {
-	app->water.reflectionProgramIdx = LoadProgram(app, "", "");
-	app->water.refractionProgramIdx = LoadProgram(app, "", "");
+	app->water.waterProgramIdx = LoadProgram(app, "water.glsl", "WATER");
 }
 
 void Init(App* app)
@@ -387,7 +386,7 @@ void Init(App* app)
 	CreateFramebuffers(app);
 
 	InitBloomPrograms(app);
-	InitWaterPrograms(app);
+	InitWaterProgram(app);
 
 	app->scene.camera.transform.setPosition(vec3(0.0f, 0.0f, 10.0f));
 	app->scene.camera.transform.setRotation(vec3(0, 180, 0));
