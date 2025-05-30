@@ -1356,6 +1356,21 @@ void PassBlitBrightPixels(App* app, FramebufferObject& fbo, const glm::vec2& vie
 	glUseProgram(0);
 }
 
+void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart waterScenePart)
+{
+	glDrawBuffer(colorChannel);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CLIP_DISTANCE0);
+
+	glClearColor(.0f, .0f, .0f, .0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(app->water.waterProgramIdx);
+	
+	//glm::mat4 viewMatrix = camera->transform.getTransformationMatrix();
+}
+
 void RenderBloom(App* app)
 {
 #define LOD(x) x
@@ -1393,7 +1408,31 @@ void RenderBloom(App* app)
 
 void RenderWater(App* app)
 {
+#pragma region Reflection
+	app->water.fboReflection.bind();
 
+	Camera reflectionCamera = app->scene.camera;
+
+	vec3 camPos = reflectionCamera.transform.getPosition();
+	reflectionCamera.transform.setPosition(vec3(camPos.x, -camPos.y, camPos.z));
+
+	vec3 camRot = reflectionCamera.transform.getRotation();
+	reflectionCamera.transform.setRotation(vec3(-camRot.x, camRot.y, camRot.z));
+
+	PassWater(app, &reflectionCamera, GL_COLOR_ATTACHMENT0, WaterScenePart::REFLECTION);
+	// PassBackground
+
+	app->water.fboReflection.unbind();
+#pragma endregion
+#pragma region Refraction
+	app->water.fboRefraction.bind();
+
+	Camera refractionCamera = app->scene.camera;
+	
+	PassWater(app, &refractionCamera, GL_COLOR_ATTACHMENT0, WaterScenePart::REFRACTION);
+
+	app->water.fboRefraction.unbind();
+#pragma endregion
 }
 
 void RenderPostprocessing(App* app)
@@ -1460,7 +1499,6 @@ void RenderFinal(App* app)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
 	glUseProgram(0);
-
 }
 
 void Render(App* app)

@@ -3,6 +3,12 @@
 #include "resources.h"
 #include "framebuffer.h"
 
+enum WaterScenePart
+{
+	REFLECTION, 
+	REFRACTION
+};
+
 struct WaterResources
 {
 	u32 waterProgramIdx;
@@ -18,4 +24,3 @@ struct WaterResources
 
 	void Init(const int& screenWidth, const int& screenHeight);
 };
-
