@@ -1367,8 +1367,27 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(app->water.waterProgramIdx);
-	
+
 	//glm::mat4 viewMatrix = camera->transform.getTransformationMatrix();
+
+	// set uniform value viewmatrix
+	// set uniform value transformationmatrix
+	// set uniform value eyeworldspace
+
+	if (waterScenePart == WaterScenePart::REFLECTION)
+	{
+		// set uniform value clippingplane
+	}
+	else
+	{
+		// set uniform value clipping plane
+	}
+
+	// ..... ?????????????????????????????????????????????????????
+
+	glUseProgram(0);
+
+	glDisable(GL_CLIP_DISTANCE0);
 }
 
 void RenderBloom(App* app)
@@ -1428,7 +1447,7 @@ void RenderWater(App* app)
 	app->water.fboRefraction.bind();
 
 	Camera refractionCamera = app->scene.camera;
-	
+
 	PassWater(app, &refractionCamera, GL_COLOR_ATTACHMENT0, WaterScenePart::REFRACTION);
 
 	app->water.fboRefraction.unbind();
