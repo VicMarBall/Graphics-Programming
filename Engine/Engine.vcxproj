@@ -65,6 +65,7 @@
     <None Include="WorkingDir\blur.glsl" />
     <None Include="WorkingDir\deferred_mesh.glsl" />
     <None Include="WorkingDir\screen_quad.glsl" />
+    <None Include="WorkingDir\water.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

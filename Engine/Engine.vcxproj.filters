@@ -157,5 +157,8 @@
     <None Include="WorkingDir\blur.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
+    <None Include="WorkingDir\water.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
   </ItemGroup>
 </Project>
