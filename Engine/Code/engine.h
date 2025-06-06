@@ -23,6 +23,12 @@ enum FramebufferDisplayType
 	DEPTH,
 };
 
+enum RenderPipeline
+{
+	FORWARD,
+	DEFERRED
+};
+
 struct App
 {
 	// Loop
@@ -117,6 +123,8 @@ struct App
 
 	GameObject* gameObjectSelected;
 	Light* lightSelected;
+
+	RenderPipeline renderPipelineToUse;
 
 	// resources
 	std::vector<Texture>  textures;

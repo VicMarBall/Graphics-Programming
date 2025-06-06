@@ -365,6 +365,7 @@ void InitWaterProgram(App* app)
 void Init(App* app)
 {
 	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
+	app->renderPipelineToUse = RenderPipeline::DEFERRED;
 	app->useBloom = true;
 	app->showGuizmos = true;
 	app->UIshowInfo = false;
@@ -1040,6 +1041,19 @@ void Gui(App* app)
 
 			ImGui::Checkbox("Show Guizmos", &app->showGuizmos);
 
+			const char* renderPipelineToUseOptions[] = { "Forward", "Deferred" };
+
+			if (ImGui::BeginCombo("Render Pipeline", renderPipelineToUseOptions[app->renderPipelineToUse])) {
+				for (int n = 0; n < IM_ARRAYSIZE(renderPipelineToUseOptions); n++) {
+					if (ImGui::Selectable(renderPipelineToUseOptions[n], app->renderPipelineToUse == n))
+					{
+						app->renderPipelineToUse = (RenderPipeline)n;
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+
 			const char* framebufferToDisplayOptions[] = { "Final", "Albedo", "Normals", "Position", "Lights", "Depth" };
 
 			if (ImGui::BeginCombo("Framebuffer To Display", framebufferToDisplayOptions[app->framebufferToDisplay])) {
@@ -1520,7 +1534,7 @@ void RenderFinal(App* app)
 	glUseProgram(0);
 }
 
-void Render(App* app)
+void DeferredRender(App* app)
 {
 	// render on this framebuffer render targets
 	app->displayFramebuffer.bind();
@@ -1560,5 +1574,42 @@ void Render(App* app)
 
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+
+void ForwardRender(App* app) 
+{
+	// clear color and depth
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	RenderMeshes(app);
+
+	if (app->showGuizmos) { RenderGuizmos(app); }
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void Render(App* app)
+{
+	switch (app->renderPipelineToUse)
+	{
+	case RenderPipeline::FORWARD:
+		ForwardRender(app);
+		break;
+	case RenderPipeline::DEFERRED:
+		DeferredRender(app);
+		break;
+	default:
+		break;
+	}
 }
 
