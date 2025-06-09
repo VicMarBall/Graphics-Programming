@@ -2,6 +2,7 @@
 #include "platform.h"
 #include "resources.h"
 #include "framebuffer.h"
+#include "game_object.h"
 
 enum WaterScenePart
 {
@@ -12,6 +13,7 @@ enum WaterScenePart
 struct WaterResources
 {
 	u32 waterProgramIdx;
+	u32 forwardClipProgramIdx;
 
 	GLuint rtReflection = 0;
 	GLuint rtRefraction = 0;
@@ -21,6 +23,8 @@ struct WaterResources
 
 	FramebufferObject fboReflection;
 	FramebufferObject fboRefraction;
+
+	GameObject waterObj;
 
 	void Init(const int& screenWidth, const int& screenHeight);
 };

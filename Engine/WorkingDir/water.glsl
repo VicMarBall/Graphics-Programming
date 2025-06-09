@@ -1,5 +1,4 @@
 #ifdef WATER
-
 #if defined(VERTEX)
 
 layout(location = 0) in vec3 position;
@@ -8,17 +7,19 @@ layout(location = 1) in vec3 normal;
 uniform mat4 projectionMatrix;
 uniform mat4 worldViewMatirx;
 
-out Data
-{
+out Data{
     vec3 positionViewspace;
     vec3 normalViewspace;
 } VSOut;
 
 void main(void)
 {
+    
+
     VSOut.positionViewspace = vec3(worldViewMatirx * vec4(position, 1.0));
     VSOut.normalViewspace = vec3(worldViewMatirx * vec4(normal, 0.0));
 
+    
     gl_Position = projectionMatrix * vec4(VSOut.positionViewspace, 1.0);
 }
 
@@ -38,7 +39,7 @@ uniform sampler2D dudvMap;
 in Data {
     vec3 positionViewspace;
     vec3 normalViewspace;
-} FSIn
+} FSIn;
 
 out vec4 outColor;
 
@@ -49,7 +50,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 vec3 reconstructPixelPosition(float depth)
 {
-    vec2 texCoords = gl_GragCoord.xy / viewportSize;
+    vec2 texCoords = gl_FragCoord.xy / viewportSize;
     vec3 positionNDC = vec3(texCoords * 2.0 - vec2(1.0), depth * 2.0 - 1.0);
     vec4 positionEyespace = projectionMatrixInv * vec4(positionNDC, 1.0);
     positionEyespace.xy /= positionEyespace.w;
@@ -60,7 +61,7 @@ void main()
 {
     vec3 N = normalize(FSIn.normalViewspace);
     vec3 V = normalize(-FSIn.positionViewspace);
-    vec3 Pw = vec3(viewMatrixInv * vec4(FSIn))
+    vec3 Pw = vec3(viewMatrixInv * vec4(FSIn.positionViewspace, 1.0));
     vec2 texCoord = gl_FragCoord.xy / viewportSize;
 
     const vec2 waveLength = vec2(2.0);
@@ -79,7 +80,7 @@ void main()
     float distortedGroundDepth = texture(refractionDepth, refractionTexCoord).x;
     vec3 distortedGroundPosViewspace = reconstructPixelPosition(distortedGroundDepth);
     float distortedWaterDepth = FSIn.positionViewspace.z - distortedGroundPosViewspace.z;
-    float tintFactor = clamp(distortedWaterDepth / turbityDistance, 0.0, 1.0);
+    float tintFactor = clamp(distortedWaterDepth / turbidityDistance, 0.0, 1.0);
     vec3 waterColor = vec3(0.25, 0.4, 0.6);
     refractionColor = mix(refractionColor, waterColor, tintFactor);
 
