@@ -15,7 +15,8 @@ public:
 	// mesh
 	u32 modelID;
 	// shader
-	u32 programID;
+	u32 deferredProgramID;
+	u32 forwardProgramID;
 
 	Transform transform;
 

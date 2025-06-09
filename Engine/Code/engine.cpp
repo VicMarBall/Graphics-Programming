@@ -781,14 +781,17 @@ void Init(App* app)
 		gameObject.modelID = modelID;
 
 		// program
-		u32 programID = LoadProgram(app, "deferred_mesh.glsl", "TEXTURED_MESH");
-		gameObject.programID = programID;
+		u32 deferredProgramID = LoadProgram(app, "deferred_mesh.glsl", "TEXTURED_MESH");
+		u32 forwardProgramID = LoadProgram(app, "forward_mesh.glsl", "TEXTURED_MESH");
+		gameObject.deferredProgramID = deferredProgramID;
+		gameObject.forwardProgramID = forwardProgramID;
 
 		app->scene.gameObjects.push_back(GameObject());
 		GameObject& gameObject2 = app->scene.gameObjects.back();
 
 		gameObject2.modelID = modelID;
-		gameObject2.programID = programID;
+		gameObject2.deferredProgramID = deferredProgramID;
+		gameObject2.forwardProgramID = forwardProgramID;
 
 		gameObject2.transform.setPosition(vec3(5.0f, 0.0f, 0.0f));
 
@@ -799,7 +802,8 @@ void Init(App* app)
 		u32 bakerHouseModelID = LoadModel(app, "Baker House/BakerHouse.fbx");
 		bakerHouse.modelID = bakerHouseModelID;
 
-		bakerHouse.programID = programID;
+		bakerHouse.deferredProgramID = deferredProgramID;
+		bakerHouse.forwardProgramID = forwardProgramID;
 
 		bakerHouse.transform.setPosition(vec3(-5.0f, 0.0f, 0.0f));
 		bakerHouse.transform.setScale(vec3(0.01f, 0.01f, 0.01f));
@@ -814,7 +818,8 @@ void Init(App* app)
 	plane.transform.setRotation(vec3(-90, 0, 0));
 
 	plane.modelID = app->planeIdx;
-	plane.programID = app->basicShapesProgramIdx;
+	plane.deferredProgramID = app->basicShapesProgramIdx;
+	plane.forwardProgramID = app->basicShapesProgramIdx;
 
 
 
@@ -1078,7 +1083,8 @@ void Gui(App* app)
 				GameObject& plane = app->scene.gameObjects.back();
 
 				plane.modelID = app->planeIdx;
-				plane.programID = app->basicShapesProgramIdx;
+				plane.deferredProgramID = app->basicShapesProgramIdx;
+				plane.forwardProgramID = app->basicShapesProgramIdx;
 			}
 			if (ImGui::MenuItem("Add Cube"))
 			{
@@ -1086,7 +1092,8 @@ void Gui(App* app)
 				GameObject& cube = app->scene.gameObjects.back();
 
 				cube.modelID = app->cubeIdx;
-				cube.programID = app->basicShapesProgramIdx;
+				cube.deferredProgramID = app->basicShapesProgramIdx;
+				cube.forwardProgramID = app->basicShapesProgramIdx;
 			}
 			if (ImGui::MenuItem("Add Sphere"))
 			{
@@ -1094,7 +1101,8 @@ void Gui(App* app)
 				GameObject& sphere = app->scene.gameObjects.back();
 
 				sphere.modelID = app->sphereIdx;
-				sphere.programID = app->basicShapesProgramIdx;
+				sphere.deferredProgramID = app->basicShapesProgramIdx;
+				sphere.forwardProgramID = app->basicShapesProgramIdx;
 			}
 
 			ImGui::EndMenu();
@@ -1206,7 +1214,7 @@ void Update(App* app)
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void RenderMeshes(App* app)
+void RenderDeferredMeshes(App* app)
 {
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
 
@@ -1218,7 +1226,42 @@ void RenderMeshes(App* app)
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
 
 		// use the program
-		Program& texturedMeshProgram = app->programs[gameObject.programID];
+		Program& texturedMeshProgram = app->programs[gameObject.deferredProgramID];
+		glUseProgram(texturedMeshProgram.handle);
+
+		// draw the mesh
+		Model& model = app->models[gameObject.modelID];
+		Mesh& mesh = app->meshes[model.meshIdx];
+
+		for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+			glBindVertexArray(vao);
+
+			u32 submeshMaterialIdx = model.materialIdx[i];
+			Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+
+			Submesh& submesh = mesh.submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+		}
+	}
+}
+
+void RenderForwardMeshes(App* app)
+{
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
+
+	for (const GameObject& gameObject : app->scene.gameObjects)
+	{
+		// set the block of the uniform
+		u32 blockOffset = gameObject.localUniformBufferHead;
+		u32 blockSize = gameObject.localUniformBufferSize;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
+
+		// use the program
+		Program& texturedMeshProgram = app->programs[gameObject.forwardProgramID];
 		glUseProgram(texturedMeshProgram.handle);
 
 		// draw the mesh
@@ -1553,7 +1596,7 @@ void DeferredRender(App* app)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	RenderMeshes(app);
+	RenderDeferredMeshes(app);
 
 	app->displayFramebuffer.unbind();
 
@@ -1590,7 +1633,7 @@ void ForwardRender(App* app)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	RenderMeshes(app);
+	RenderForwardMeshes(app);
 
 	if (app->showGuizmos) { RenderGuizmos(app); }
 

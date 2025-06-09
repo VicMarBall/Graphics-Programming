@@ -160,5 +160,8 @@
     <None Include="WorkingDir\water.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
+    <None Include="WorkingDir\forward_mesh.glsl">
+      <Filter>Shaders\Forward</Filter>
+    </None>
   </ItemGroup>
 </Project>

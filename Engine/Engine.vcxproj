@@ -61,6 +61,7 @@
     <ClInclude Include="Code\transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="WorkingDir\forward_mesh.glsl" />
     <None Include="WorkingDir\bloom.glsl" />
     <None Include="WorkingDir\blur.glsl" />
     <None Include="WorkingDir\deferred_mesh.glsl" />
