@@ -1487,9 +1487,6 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 		}
 	}
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CLIP_DISTANCE0);
 }
 
 void RenderBloom(App* app)
@@ -1555,14 +1552,17 @@ void RenderWater(App* app)
 	app->water.fboRefraction.unbind();
 #pragma endregion
 
+	app->finalFramebuffer.bind();
+
 	Program& waterProgram = app->programs[app->water.waterProgramIdx];
 	glUseProgram(waterProgram.handle);
 
 	GLuint projectionMatLoc = glGetUniformLocation(waterProgram.handle, "projectionMatrix");
-	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, &app->projection[0][0]);
+	glm::mat4 projection = app->projection * app->view * app->water.waterObj.transform.getTransformationMatrix();
+	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, &projection[0][0]);
 	// !!
 	GLuint worldViewMatLoc = glGetUniformLocation(waterProgram.handle, "worldViewMatrix");
-	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, &app->scene.camera.transform.getTransformationMatrix()[0][0]);
+	glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &app->water.waterObj.transform.getTransformationMatrix()[0][0]);
 
 
 	GLuint viewportSizeLoc = glGetUniformLocation(waterProgram.handle, "viewportSize");
@@ -1601,11 +1601,24 @@ void RenderWater(App* app)
 
 	Model& model = app->models[app->water.waterObj.modelID];
 	Mesh& mesh = app->meshes[model.meshIdx];
-	GLuint vao = FindVAO(mesh, 0, waterProgram);
-	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
+		GLuint vao = FindVAO(mesh, i, waterProgram);
+		glBindVertexArray(vao);
+
+		//u32 submeshMaterialIdx = model.materialIdx[i];
+		//Material& submeshMaterial = app->materials[submeshMaterialIdx];
+		//
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+
+		Submesh& submesh = mesh.submeshes[i];
+		glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+	}
 
 	glUseProgram(0);
+
+	app->finalFramebuffer.unbind();
 }
 
 void RenderPostprocessing(App* app)
