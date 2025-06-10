@@ -20,7 +20,7 @@ void WaterResources::Init(const int& screenWidth, const int& screenHeight)
 
 
 	glGenTextures(1, &rtReflectionDepth);
-	glBindTexture(GL_TEXTURE_2D, rtReflection);
+	glBindTexture(GL_TEXTURE_2D, rtReflectionDepth);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -28,7 +28,7 @@ void WaterResources::Init(const int& screenWidth, const int& screenHeight)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
 	glGenTextures(1, &rtRefractionDepth);
-	glBindTexture(GL_TEXTURE_2D, rtRefraction);
+	glBindTexture(GL_TEXTURE_2D, rtRefractionDepth);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
