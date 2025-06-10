@@ -816,11 +816,11 @@ void Init(App* app)
 
 	app->scene.gameObjects.push_back(GameObject());
 	GameObject& plane = app->scene.gameObjects.back();
-	
+
 	plane.transform.setScale(vec3(10.0f, 10.0f, 10.0f));
 	plane.transform.setPosition(vec3(0, -3.5f, 0));
 	plane.transform.setRotation(vec3(-90, 0, 0));
-	
+
 	plane.modelID = app->planeIdx;
 	plane.deferredProgramID = app->basicShapesProgramIdx;
 	plane.forwardProgramID = app->basicShapesProgramIdx;
@@ -1429,23 +1429,24 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 	glClearColor(.0f, .0f, .0f, .0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(app->water.forwardClipTexturedMeshProgramIdx);
+	GLint programHandle = app->programs[app->water.forwardClipTexturedMeshProgramIdx].handle;
+	glUseProgram(programHandle);
 
 #pragma region SetUniforms
 	glm::mat4 viewMatrix = glm::inverse(camera->transform.getTransformationMatrix());
 
-	GLint worldViewMatLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "worldViewMatrix");
+	GLint worldViewMatLoc = glGetUniformLocation(programHandle, "worldViewMatrix");
 	glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 
-	GLint projMatLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "projectionMatrix");
+	GLint projMatLoc = glGetUniformLocation(programHandle, "projectionMatrix");
 	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &app->projection[0][0]);
 
 	glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
 
-	GLint eyeWorldSpaceLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "eyeWorldSpace");
+	GLint eyeWorldSpaceLoc = glGetUniformLocation(programHandle, "eyeWorldSpace");
 	glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);
 
-	GLint clippingPlaneLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "clippingPlane");
+	GLint clippingPlaneLoc = glGetUniformLocation(programHandle, "clippingPlane");
 
 	glm::vec4 waterPlaneNormal;
 
@@ -1471,7 +1472,7 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 		u32 blockOffset = gameObject.localUniformBufferHead;
 		u32 blockSize = gameObject.localUniformBufferSize;
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
-	
+
 		// use the program
 		Program& forwardClipProgram = app->programs[gameObject.forwardClipProgramID];
 		glUseProgram(forwardClipProgram.handle);
@@ -1479,18 +1480,18 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 		// draw the mesh
 		Model& model = app->models[gameObject.modelID];
 		Mesh& mesh = app->meshes[model.meshIdx];
-	
+
 		for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
 			GLuint vao = FindVAO(mesh, i, forwardClipProgram);
 			glBindVertexArray(vao);
-	
+
 			u32 submeshMaterialIdx = model.materialIdx[i];
 			Material& submeshMaterial = app->materials[submeshMaterialIdx];
-	
+
 			//glUniform1i(textureLoc, 0);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-	
+
 			Submesh& submesh = mesh.submeshes[i];
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 		}
