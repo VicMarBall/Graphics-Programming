@@ -13,7 +13,8 @@ enum WaterScenePart
 struct WaterResources
 {
 	u32 waterProgramIdx;
-	u32 forwardClipProgramIdx;
+	u32 forwardClipTexturedMeshProgramIdx;
+	u32 forwardClipBasicShapesProgramIdx;
 
 	GLuint rtReflection = 0;
 	GLuint rtRefraction = 0;

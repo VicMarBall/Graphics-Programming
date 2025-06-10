@@ -11,7 +11,7 @@ struct Light
 
 ///////////////////////////////////////////////////////////////////////
 
-#ifdef FORWARD_CLIP
+#ifdef CLIP_TEXTURED_MESH
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
@@ -35,10 +35,10 @@ void main()
 	vPosition = vec3(worldViewMatirx * vec4(aPosition, 1.0));
 	vNormal = normalize(vec3(worldViewMatirx * vec4(aNormal, 0.0)));
 
-    //vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
+    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
 
 	gl_Position = projectionMatrix * vec4(aPosition, 1.0);
-    //gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
+    gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
@@ -93,3 +93,59 @@ void main()
 #endif
 
 ///////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////
+
+#ifdef CLIP_BASIC_SHAPE
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aNormal;
+
+uniform mat4 worldViewMatirx;
+uniform mat4 projectionMatrix;
+uniform vec3 eyeWorldSpace;
+uniform vec4 clippingPlane;
+
+out vec3 vPosition; // in worldspace
+out vec3 vNormal;   // in worldspace
+
+void main()
+{
+	vPosition = vec3(worldViewMatirx * vec4(aPosition, 1.0));
+	vNormal = normalize(vec3(worldViewMatirx * vec4(aNormal, 0.0)));
+
+    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
+
+	gl_Position = projectionMatrix * vec4(aPosition, 1.0);
+    gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+in vec3 vPosition;
+in vec3 vNormal;
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[256];
+};
+
+layout(location = 0) out vec4 oColor;
+layout(location = 1) out vec4 oNormal;
+layout(location = 2) out vec4 oPosition;
+
+void main()
+{
+
+	oColor = vec4(1.0, 1.0, 1.0, 1.0);
+	oNormal = vec4(vNormal, 1.0);
+	oPosition = vec4(vPosition, 1.0);
+
+}
+
+#endif
+#endif

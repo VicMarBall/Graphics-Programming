@@ -359,7 +359,8 @@ void InitBloomPrograms(App* app)
 
 void InitWaterPrograms(App* app)
 {
-	app->water.forwardClipProgramIdx = LoadProgram(app, "forward_clipping.glsl", "FORWARD_CLIP");
+	app->water.forwardClipTexturedMeshProgramIdx = LoadProgram(app, "forward_clipping.glsl", "CLIP_TEXTURED_MESH");
+	app->water.forwardClipBasicShapesProgramIdx = LoadProgram(app, "forward_clipping.glsl", "CLIP_BASIC_SHAPE");
 	app->water.waterProgramIdx = LoadProgram(app, "water.glsl", "WATER");
 }
 
@@ -785,6 +786,7 @@ void Init(App* app)
 		u32 forwardProgramID = LoadProgram(app, "forward_mesh.glsl", "TEXTURED_MESH");
 		gameObject.deferredProgramID = deferredProgramID;
 		gameObject.forwardProgramID = forwardProgramID;
+		gameObject.forwardClipProgramID = app->water.forwardClipTexturedMeshProgramIdx;
 
 		app->scene.gameObjects.push_back(GameObject());
 		GameObject& gameObject2 = app->scene.gameObjects.back();
@@ -792,6 +794,7 @@ void Init(App* app)
 		gameObject2.modelID = modelID;
 		gameObject2.deferredProgramID = deferredProgramID;
 		gameObject2.forwardProgramID = forwardProgramID;
+		gameObject2.forwardClipProgramID = app->water.forwardClipTexturedMeshProgramIdx;
 
 		gameObject2.transform.setPosition(vec3(5.0f, 0.0f, 0.0f));
 
@@ -804,24 +807,24 @@ void Init(App* app)
 
 		bakerHouse.deferredProgramID = deferredProgramID;
 		bakerHouse.forwardProgramID = forwardProgramID;
+		bakerHouse.forwardClipProgramID = app->water.forwardClipTexturedMeshProgramIdx;
 
 		bakerHouse.transform.setPosition(vec3(-5.0f, 0.0f, 0.0f));
 		bakerHouse.transform.setScale(vec3(0.01f, 0.01f, 0.01f));
 	}
 
 
-	//app->scene.gameObjects.push_back(GameObject());
-	//GameObject& plane = app->scene.gameObjects.back();
-	//
-	//plane.transform.setScale(vec3(10.0f, 10.0f, 10.0f));
-	//plane.transform.setPosition(vec3(0, -3.5f, 0));
-	//plane.transform.setRotation(vec3(-90, 0, 0));
-	//
-	//plane.modelID = app->planeIdx;
-	//plane.deferredProgramID = app->basicShapesProgramIdx;
-	//plane.forwardProgramID = app->basicShapesProgramIdx;
-
-
+	app->scene.gameObjects.push_back(GameObject());
+	GameObject& plane = app->scene.gameObjects.back();
+	
+	plane.transform.setScale(vec3(10.0f, 10.0f, 10.0f));
+	plane.transform.setPosition(vec3(0, -3.5f, 0));
+	plane.transform.setRotation(vec3(-90, 0, 0));
+	
+	plane.modelID = app->planeIdx;
+	plane.deferredProgramID = app->basicShapesProgramIdx;
+	plane.forwardProgramID = app->basicShapesProgramIdx;
+	plane.forwardClipProgramID = app->water.forwardClipBasicShapesProgramIdx;
 
 	int maxUniformBufferSize;
 	//int uniformBlockAlignment;
@@ -1085,6 +1088,7 @@ void Gui(App* app)
 				plane.modelID = app->planeIdx;
 				plane.deferredProgramID = app->basicShapesProgramIdx;
 				plane.forwardProgramID = app->basicShapesProgramIdx;
+				plane.forwardClipProgramID = app->water.forwardClipBasicShapesProgramIdx;
 			}
 			if (ImGui::MenuItem("Add Cube"))
 			{
@@ -1094,6 +1098,7 @@ void Gui(App* app)
 				cube.modelID = app->cubeIdx;
 				cube.deferredProgramID = app->basicShapesProgramIdx;
 				cube.forwardProgramID = app->basicShapesProgramIdx;
+				cube.forwardClipProgramID = app->water.forwardClipBasicShapesProgramIdx;
 			}
 			if (ImGui::MenuItem("Add Sphere"))
 			{
@@ -1103,6 +1108,7 @@ void Gui(App* app)
 				sphere.modelID = app->sphereIdx;
 				sphere.deferredProgramID = app->basicShapesProgramIdx;
 				sphere.forwardProgramID = app->basicShapesProgramIdx;
+				sphere.forwardClipProgramID = app->water.forwardClipBasicShapesProgramIdx;
 			}
 
 			ImGui::EndMenu();
@@ -1423,23 +1429,23 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 	glClearColor(.0f, .0f, .0f, .0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(app->water.forwardClipProgramIdx);
+	glUseProgram(app->water.forwardClipTexturedMeshProgramIdx);
 
 #pragma region SetUniforms
 	glm::mat4 viewMatrix = glm::inverse(camera->transform.getTransformationMatrix());
 
-	GLint worldViewMatLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "worldViewMatrix");
+	GLint worldViewMatLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "worldViewMatrix");
 	glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 
-	GLint projMatLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "projectionMatrix");
+	GLint projMatLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "projectionMatrix");
 	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &app->projection[0][0]);
 
 	glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
 
-	GLint eyeWorldSpaceLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "eyeWorldSpace");
+	GLint eyeWorldSpaceLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "eyeWorldSpace");
 	glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);
 
-	GLint clippingPlaneLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "clippingPlane");
+	GLint clippingPlaneLoc = glGetUniformLocation(app->water.forwardClipTexturedMeshProgramIdx, "clippingPlane");
 
 	glm::vec4 waterPlaneNormal;
 
@@ -1467,7 +1473,7 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->uniformsBuffer.handle, blockOffset, blockSize);
 	
 		// use the program
-		Program& forwardClipProgram = app->programs[app->water.forwardClipProgramIdx];
+		Program& forwardClipProgram = app->programs[gameObject.forwardClipProgramID];
 		glUseProgram(forwardClipProgram.handle);
 
 		// draw the mesh
