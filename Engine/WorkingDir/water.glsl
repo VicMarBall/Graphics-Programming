@@ -28,8 +28,8 @@ in Data {
 } FSIn;
 
 uniform vec2 viewportSize;
-uniform mat4 modelViewMatrix;
-uniform mat4 viewMatrixInv;
+//uniform mat4 modelViewMatrix;
+//uniform mat4 viewMatrixInv;
 uniform mat4 projectionMatrixInv;
 uniform sampler2D reflectionMap;
 uniform sampler2D refractionMap;
@@ -58,19 +58,19 @@ void main()
 {
     vec3 N = normalize(FSIn.normalViewspace);
     vec3 V = normalize(-FSIn.positionViewspace);
-    vec3 Pw = vec3(viewMatrixInv * vec4(FSIn.positionViewspace, 1.0));
+    //vec3 Pw = vec3(viewMatrixInv * vec4(FSIn.positionViewspace, 1.0));
     vec2 texCoord = gl_FragCoord.xy / viewportSize;
 
-    const vec2 waveLength = vec2(2.0);
-    const vec2 waveStrength = vec2(0.05);
+    //const vec2 waveLength = vec2(2.0);
+    //const vec2 waveStrength = vec2(0.05);
     const float turbidityDistance = 10.0;
 
     //vec2 distortion =
     //(2.0 * texture(dudvMap, Pw.xy / waveLength).rg - vec2(1.0)) * waveStrength + waveStrength/7;
 
     // Distorted reflection and refraction
-    vec2 reflectionTexCoord = vec2(texCoord.s, 1.0 - texCoord.t);// + distortion;
-    vec2 refractionTexCoord = texCoord;// + distortion;
+    vec2 reflectionTexCoord = vec2(texCoord.s, 1.0 - texCoord.t);
+    vec2 refractionTexCoord = texCoord;
     vec3 reflectionColor = texture(reflectionMap, reflectionTexCoord).rgb;
     vec3 refractionColor = texture(refractionMap, refractionTexCoord).rgb;
 
@@ -85,7 +85,7 @@ void main()
     // Fresnel
     vec3 F0 = vec3(0.1);
     vec3 F = fresnelSchlick(max(0.0, dot(V, N)), F0);
-    outColor.rgb = mix(refractionColor, reflectionColor, F);
+    outColor.rgb = mix(reflectionColor, refractionColor, F);
     outColor.a = 1.0;
     //outColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

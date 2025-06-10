@@ -1552,6 +1552,9 @@ void RenderWater(App* app)
 	app->water.fboRefraction.unbind();
 #pragma endregion
 
+	glClearColor(.0f, .0f, .0f, .0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	app->finalFramebuffer.bind();
 
 	Program& waterProgram = app->programs[app->water.waterProgramIdx];
@@ -1581,23 +1584,23 @@ void RenderWater(App* app)
 
 
 	GLuint reflectionMapLoc = glGetUniformLocation(waterProgram.handle, "reflectionMap");
-	glUniform1i(reflectionMapLoc, 0);
 	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(reflectionMapLoc, 0);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboReflection.handle);
-
+	
 	GLuint refractionMapLoc = glGetUniformLocation(waterProgram.handle, "refractionMap");
-	glUniform1i(refractionMapLoc, 1);
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(refractionMapLoc, 0);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboRefraction.handle);
 
 	GLuint reflectionDepthLoc = glGetUniformLocation(waterProgram.handle, "reflectionDepth");
+	glActiveTexture(GL_TEXTURE_DEPTH);
 	glUniform1i(reflectionDepthLoc, 2);
-	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboReflection.handle);
 
 	GLuint refractionDepthLoc = glGetUniformLocation(waterProgram.handle, "refractionDepth");
+	glActiveTexture(GL_TEXTURE_DEPTH);
 	glUniform1i(refractionDepthLoc, 3);
-	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboRefraction.handle);
 
 	Model& model = app->models[app->water.waterObj.modelID];
@@ -1606,12 +1609,6 @@ void RenderWater(App* app)
 	for (u32 i = 0; i < mesh.submeshes.size(); ++i) {
 		GLuint vao = FindVAO(mesh, i, waterProgram);
 		glBindVertexArray(vao);
-
-		//u32 submeshMaterialIdx = model.materialIdx[i];
-		//Material& submeshMaterial = app->materials[submeshMaterialIdx];
-		//
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
 
 		Submesh& submesh = mesh.submeshes[i];
 		glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
