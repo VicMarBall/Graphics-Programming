@@ -107,8 +107,12 @@ void main()
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 
-uniform mat4 worldViewMatrix;
-uniform mat4 projectionMatrix;
+layout(binding = 1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+};
+
 uniform vec4 clippingPlane;
 uniform vec3 eyeWorldSpace;
 
@@ -117,12 +121,12 @@ out vec3 vNormal;   // in worldspace
 
 void main()
 {
-	vPosition = vec3(worldViewMatrix * vec4(aPosition, 1.0));
-	vNormal = normalize(vec3(worldViewMatrix * vec4(aNormal, 0.0)));
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = normalize(vec3(uWorldMatrix * vec4(aNormal, 0.0)));
 
     vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
 
-	gl_Position = projectionMatrix * vec4(aPosition, 1.0);
+	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
     gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
 }
 
