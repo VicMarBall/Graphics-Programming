@@ -90,7 +90,7 @@ void main()
 		}
 	}
 
-	oColor = baseColor * vec4(lightColor+vec3(1.0, 1.0, 1.0), 1.0);
+	oColor = baseColor * vec4(lightColor, 1.0);
 }
 
 #endif
