@@ -112,6 +112,8 @@ struct App
 	bool useBloom;
 	bool UIbloomSettings;
 
+	bool useWater;
+
 	// imgui UI
 	bool showGuizmos;
 	bool UIshowInfo;

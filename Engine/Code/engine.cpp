@@ -369,6 +369,7 @@ void Init(App* app)
 	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
 	app->renderPipelineToUse = RenderPipeline::DEFERRED;
 	app->useBloom = true;
+	app->useWater = true;
 	app->showGuizmos = true;
 	app->UIshowInfo = false;
 	app->UIsceneHierarchy = true;
@@ -1115,6 +1116,7 @@ void Gui(App* app)
 		}
 
 		if (ImGui::BeginMenu("Postprocessing")) {
+			ImGui::Checkbox("Water", &app->useWater);
 			ImGui::Checkbox("Bloom", &app->useBloom);
 			if (ImGui::MenuItem("Bloom Settings")) { app->UIbloomSettings = true; }
 
@@ -1564,7 +1566,7 @@ void RenderWater(App* app)
 
 void RenderPostprocessing(App* app)
 {
-	RenderWater(app);
+	if (app->useWater) { RenderWater(app); }
 	if (app->useBloom) { RenderBloom(app); }
 }
 
