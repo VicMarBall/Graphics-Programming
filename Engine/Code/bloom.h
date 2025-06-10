@@ -21,7 +21,7 @@ struct BloomResources
 	void Init(const int& screenWidth, const int& screenHeight);
 
 	// parameters
-	float threshold = 1.0f;
-	float intensity = 1.0f;
-	int kernelRadius = 16;
+	float threshold = 0.9f;
+	float intensity = 2.0f;
+	int kernelRadius = 32;
 };
