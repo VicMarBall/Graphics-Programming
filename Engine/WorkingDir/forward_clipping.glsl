@@ -35,8 +35,7 @@ void main()
 	vPosition = vec3(worldViewMatrix * vec4(aPosition, 1.0));
 	vNormal = normalize(vec3(worldViewMatrix * vec4(aNormal, 0.0)));
 
-	vec3 camPosition = vec3(worldViewMatrix[3][0], worldViewMatrix[3][1], worldViewMatrix[3][2]);
-    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(camPosition) / 100.0);
+    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
 
 	gl_Position = projectionMatrix * vec4(aPosition, 1.0);
     gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
