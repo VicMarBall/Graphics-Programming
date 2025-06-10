@@ -369,7 +369,7 @@ void Init(App* app)
 	app->framebufferToDisplay = FramebufferDisplayType::FINAL;
 	app->renderPipelineToUse = RenderPipeline::DEFERRED;
 	app->useBloom = true;
-	app->useWater = true;
+	app->useWater = false;
 	app->showGuizmos = true;
 	app->UIshowInfo = false;
 	app->UIsceneHierarchy = true;
