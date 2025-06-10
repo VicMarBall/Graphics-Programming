@@ -1566,7 +1566,8 @@ void RenderWater(App* app)
 
 
 	GLuint viewportSizeLoc = glGetUniformLocation(waterProgram.handle, "viewportSize");
-	glUniform2iv(viewportSizeLoc, 1, &app->displaySize[0]);
+	glm::vec2 viewportSize = glm::vec2(app->displaySize.x, app->displaySize.y);
+	glUniform2fv(viewportSizeLoc, 1, &viewportSize[0]);
 
 	// !!
 	GLuint modelViewMatrixLoc = glGetUniformLocation(waterProgram.handle, "modelViewMatrix");
