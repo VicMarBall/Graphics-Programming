@@ -1433,8 +1433,6 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
 
-	//GLint textureLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "uTexture");
-
 	for (const GameObject& gameObject : app->scene.gameObjects)
 	{
 		// set the block of the uniform
@@ -1447,20 +1445,17 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 		glUseProgram(forwardClipProgram.handle);
 
 #pragma region SetUniforms
-		glm::mat4 viewMatrix = camera->transform.getTransformationMatrix();
+		GLuint worldViewMatLoc = glGetUniformLocation(app->programs[gameObject.forwardClipProgramID].handle, "worldViewMatrix");
+		glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &camera->transform.getTransformationMatrix()[0][0]);
 
-		GLint worldViewMatLoc = glGetUniformLocation(forwardClipProgram.handle, "worldViewMatrix");
-		glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-
-		GLint projMatLoc = glGetUniformLocation(forwardClipProgram.handle, "projectionMatrix");
+		GLuint projMatLoc = glGetUniformLocation(forwardClipProgram.handle, "projectionMatrix");
 		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &app->projection[0][0]);
 
 		glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
-
-		GLint eyeWorldSpaceLoc = glGetUniformLocation(forwardClipProgram.handle, "eyeWorldSpace");
+		GLuint eyeWorldSpaceLoc = glGetUniformLocation(forwardClipProgram.handle, "eyeWorldSpace");
 		glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);
 
-		GLint clippingPlaneLoc = glGetUniformLocation(forwardClipProgram.handle, "clippingPlane");
+		GLuint clippingPlaneLoc = glGetUniformLocation(forwardClipProgram.handle, "clippingPlane");
 
 		glm::vec4 waterPlaneNormal;
 
