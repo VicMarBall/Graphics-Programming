@@ -1431,39 +1431,6 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 	glClearColor(.0f, .0f, .0f, .0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	GLint programHandle = app->programs[app->water.forwardClipTexturedMeshProgramIdx].handle;
-	glUseProgram(programHandle);
-
-#pragma region SetUniforms
-	glm::mat4 viewMatrix = glm::inverse(camera->transform.getTransformationMatrix());
-
-	GLint worldViewMatLoc = glGetUniformLocation(programHandle, "worldViewMatrix");
-	glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-
-	GLint projMatLoc = glGetUniformLocation(programHandle, "projectionMatrix");
-	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &app->projection[0][0]);
-
-	glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
-
-	GLint eyeWorldSpaceLoc = glGetUniformLocation(programHandle, "eyeWorldSpace");
-	glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);
-
-	GLint clippingPlaneLoc = glGetUniformLocation(programHandle, "clippingPlane");
-
-	glm::vec4 waterPlaneNormal;
-
-	if (waterScenePart == WaterScenePart::REFLECTION)
-	{
-		waterPlaneNormal = glm::vec4(0.0, 1.0, 0.0, 0.0);
-	}
-	else
-	{
-		waterPlaneNormal = glm::vec4(0.0, -1.0, 0.0, 0.0);
-	}
-
-	glUniform4fv(clippingPlaneLoc, 1, &waterPlaneNormal[0]);
-#pragma endregion
-
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
 
 	//GLint textureLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "uTexture");
@@ -1478,6 +1445,36 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 		// use the program
 		Program& forwardClipProgram = app->programs[gameObject.forwardClipProgramID];
 		glUseProgram(forwardClipProgram.handle);
+
+#pragma region SetUniforms
+		glm::mat4 viewMatrix = camera->transform.getTransformationMatrix();
+
+		GLint worldViewMatLoc = glGetUniformLocation(forwardClipProgram.handle, "worldViewMatrix");
+		glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+
+		GLint projMatLoc = glGetUniformLocation(forwardClipProgram.handle, "projectionMatrix");
+		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &app->projection[0][0]);
+
+		glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
+
+		GLint eyeWorldSpaceLoc = glGetUniformLocation(forwardClipProgram.handle, "eyeWorldSpace");
+		glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);
+
+		GLint clippingPlaneLoc = glGetUniformLocation(forwardClipProgram.handle, "clippingPlane");
+
+		glm::vec4 waterPlaneNormal;
+
+		if (waterScenePart == WaterScenePart::REFLECTION)
+		{
+			waterPlaneNormal = glm::vec4(0.0, 1.0, 0.0, 0.0);
+		}
+		else
+		{
+			waterPlaneNormal = glm::vec4(0.0, -1.0, 0.0, 0.0);
+		}
+
+		glUniform4fv(clippingPlaneLoc, 1, &waterPlaneNormal[0]);
+#pragma endregion
 
 		// draw the mesh
 		Model& model = app->models[gameObject.modelID];
