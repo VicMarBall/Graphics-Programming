@@ -50,7 +50,7 @@ vec3 reconstructPixelPosition(float depth)
     vec2 texCoords = gl_FragCoord.xy / viewportSize;
     vec3 positionNDC = vec3(texCoords * 2.0 - vec2(1.0), depth * 2.0 - 1.0);
     vec4 positionEyespace = projectionMatrixInv * vec4(positionNDC, 1.0);
-    positionEyespace.xy /= positionEyespace.w;
+    positionEyespace.xyz /= positionEyespace.w;
     return positionEyespace.xyz;
 }
 
@@ -69,7 +69,7 @@ void main()
     //(2.0 * texture(dudvMap, Pw.xy / waveLength).rg - vec2(1.0)) * waveStrength + waveStrength/7;
 
     // Distorted reflection and refraction
-    vec2 reflectionTexCoord = vec2(texCoord.s, 1.0 - texCoord.t);// * distortion;
+    vec2 reflectionTexCoord = vec2(texCoord.s, 1.0 - texCoord.t);// + distortion;
     vec2 refractionTexCoord = texCoord;// + distortion;
     vec3 reflectionColor = texture(reflectionMap, reflectionTexCoord).rgb;
     vec3 refractionColor = texture(refractionMap, refractionTexCoord).rgb;
@@ -83,7 +83,7 @@ void main()
     refractionColor = mix(refractionColor, waterColor, tintFactor);
 
     // Fresnel
-    vec3 F0 = vec3(1.0);
+    vec3 F0 = vec3(0.1);
     vec3 F = fresnelSchlick(max(0.0, dot(V, N)), F0);
     outColor.rgb = mix(refractionColor, reflectionColor, F);
     outColor.a = 1.0;
