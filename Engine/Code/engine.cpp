@@ -1445,12 +1445,6 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 		glUseProgram(forwardClipProgram.handle);
 
 #pragma region SetUniforms
-		GLuint worldViewMatLoc = glGetUniformLocation(app->programs[gameObject.forwardClipProgramID].handle, "worldViewMatrix");
-		glUniformMatrix4fv(worldViewMatLoc, 1, GL_FALSE, &camera->transform.getTransformationMatrix()[0][0]);
-
-		GLuint projMatLoc = glGetUniformLocation(forwardClipProgram.handle, "projectionMatrix");
-		glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, &app->projection[0][0]);
-
 		glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
 		GLuint eyeWorldSpaceLoc = glGetUniformLocation(forwardClipProgram.handle, "eyeWorldSpace");
 		glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);

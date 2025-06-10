@@ -19,8 +19,12 @@ layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
 
-uniform mat4 worldViewMatrix;
-uniform mat4 projectionMatrix;
+layout(binding = 1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+};
+
 uniform vec4 clippingPlane;
 uniform vec3 eyeWorldSpace;
 
@@ -32,13 +36,12 @@ void main()
 {
 	vTexCoord = aTexCoord;
 
-	vPosition = vec3(worldViewMatrix * vec4(aPosition, 1.0));
-	vNormal = normalize(vec3(worldViewMatrix * vec4(aNormal, 0.0)));
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = normalize(vec3(uWorldMatrix * vec4(aNormal, 0.0)));
 
-	vec3 camPosition = vec3(worldViewMatrix[3][0], worldViewMatrix[3][1], worldViewMatrix[3][2]);
-    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(camPosition) / 100.0);
+    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
 
-	gl_Position = projectionMatrix * vec4(aPosition, 1.0);
+	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
     gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
 }
 
@@ -63,31 +66,31 @@ void main()
 {
 	vec4 baseColor = texture(uTexture, vTexCoord);
 
-	//vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);	
-	//for (int i = 0; i < uLightCount; ++i)
-	//{
-	//	vec3 diffuse;
-	//	switch (uLight[i].type)
-	//	{
-	//	case 0: // point light
-	//		float distanceToPoint = distance(uLight[i].position, vPosition);
-	//		vec3 directionVector = vPosition - uLight[i].position;
-	//
-	//		diffuse = max(0.0f, -dot(vNormal, normalize(directionVector))) * uLight[i].color / distanceToPoint;
-	//
-	//		lightColor += diffuse;
-	//		break;
-	//	case 1: // directional
-	//		diffuse = max(0.0f, -dot(vNormal, normalize(uLight[i].direction))) * uLight[i].color;
-	//
-	//		lightColor += diffuse;
-	//		break;
-	//	default:
-	//		break;
-	//	}
-	//}
+	vec3 lightColor = vec3(0.0f, 0.0f, 0.0f);	
+	for (int i = 0; i < uLightCount; ++i)
+	{
+		vec3 diffuse;
+		switch (uLight[i].type)
+		{
+		case 0: // point light
+			float distanceToPoint = distance(uLight[i].position, vPosition);
+			vec3 directionVector = vPosition - uLight[i].position;
+	
+			diffuse = max(0.0f, -dot(vNormal, normalize(directionVector))) * uLight[i].color / distanceToPoint;
+	
+			lightColor += diffuse;
+			break;
+		case 1: // directional
+			diffuse = max(0.0f, -dot(vNormal, normalize(uLight[i].direction))) * uLight[i].color;
+	
+			lightColor += diffuse;
+			break;
+		default:
+			break;
+		}
+	}
 
-	oColor = baseColor;
+	oColor = baseColor * vec4(lightColor+vec3(1.0, 1.0, 1.0), 1.0);
 }
 
 #endif
