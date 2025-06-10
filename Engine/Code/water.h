@@ -27,5 +27,5 @@ struct WaterResources
 
 	GameObject waterObj;
 
-	void Init(const int& screenWidth, const int& screenHeight);
+	void Init(u32 planeIdx, const int& screenWidth, const int& screenHeight);
 };

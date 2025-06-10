@@ -1,6 +1,6 @@
 #include "water.h"
 
-void WaterResources::Init(const int& screenWidth, const int& screenHeight)
+void WaterResources::Init(u32 planeIdx, const int& screenWidth, const int& screenHeight)
 {
 	glGenTextures(1, &rtReflection);
 	glBindTexture(GL_TEXTURE_2D, rtReflection);
@@ -47,4 +47,14 @@ void WaterResources::Init(const int& screenWidth, const int& screenHeight)
 	fboRefraction.addColorAttachment(GL_COLOR_ATTACHMENT0, rtRefraction, 0);
 	fboRefraction.checkStatus();
 	fboRefraction.unbind();
+
+
+	waterObj.transform.setScale(vec3(10.0f, 10.0f, 10.0f));
+	waterObj.transform.setPosition(vec3(0, 0, 0));
+	waterObj.transform.setRotation(vec3(-90, 0, 0));
+
+	waterObj.modelID = planeIdx;
+	waterObj.deferredProgramID = waterProgramIdx;
+	waterObj.forwardProgramID = waterProgramIdx;
+	waterObj.forwardClipProgramID = waterProgramIdx;
 }

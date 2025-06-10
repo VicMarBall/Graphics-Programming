@@ -5,25 +5,27 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 
 uniform mat4 projectionMatrix;
-uniform mat4 worldViewMatirx;
+uniform mat4 worldViewMatrix;
 
-out Data{
+out Data {
     vec3 positionViewspace;
     vec3 normalViewspace;
 } VSOut;
 
 void main(void)
 {
-    
+    VSOut.positionViewspace = vec3(worldViewMatrix * vec4(position, 1.0));
+    VSOut.normalViewspace = vec3(worldViewMatrix * vec4(normal, 0.0));
 
-    VSOut.positionViewspace = vec3(worldViewMatirx * vec4(position, 1.0));
-    VSOut.normalViewspace = vec3(worldViewMatirx * vec4(normal, 0.0));
-
-    
     gl_Position = projectionMatrix * vec4(VSOut.positionViewspace, 1.0);
 }
 
 #elif defined(FRAGMENT)
+
+in Data {
+    vec3 positionViewspace;
+    vec3 normalViewspace;
+} FSIn;
 
 uniform vec2 viewportSize;
 uniform mat4 modelViewMatrix;
@@ -33,13 +35,8 @@ uniform sampler2D reflectionMap;
 uniform sampler2D refractionMap;
 uniform sampler2D reflectionDepth;
 uniform sampler2D refractionDepth;
-uniform sampler2D normalMap;
-uniform sampler2D dudvMap;
-
-in Data {
-    vec3 positionViewspace;
-    vec3 normalViewspace;
-} FSIn;
+//uniform sampler2D normalMap;
+//uniform sampler2D dudvMap;
 
 out vec4 outColor;
 
@@ -68,11 +65,12 @@ void main()
     const vec2 waveStrength = vec2(0.05);
     const float turbidityDistance = 10.0;
 
-    vec2 distortion = (2.0 * texture(dudvMap, Pw.xy / waveLength).rg - vec2(1.0)) * waveStrength + waveStrength/7;
+    //vec2 distortion =
+    //(2.0 * texture(dudvMap, Pw.xy / waveLength).rg - vec2(1.0)) * waveStrength + waveStrength/7;
 
     // Distorted reflection and refraction
-    vec2 reflectionTexCoord = vec2(texCoord.s, 1.0 - texCoord.t) * distortion;
-    vec2 refractionTexCoord = texCoord + distortion;
+    vec2 reflectionTexCoord = vec2(texCoord.s, 1.0 - texCoord.t);// * distortion;
+    vec2 refractionTexCoord = texCoord;// + distortion;
     vec3 reflectionColor = texture(reflectionMap, reflectionTexCoord).rgb;
     vec3 refractionColor = texture(refractionMap, refractionTexCoord).rgb;
 

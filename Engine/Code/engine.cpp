@@ -291,7 +291,7 @@ void CreateFramebuffers(App* app)
 {
 	CreateScreenFramebuffers(app);
 	app->bloom.Init(app->displaySize.x, app->displaySize.y);
-	app->water.Init(app->displaySize.x, app->displaySize.y);
+	app->water.Init(app->planeIdx, app->displaySize.x, app->displaySize.y);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program) {
@@ -1487,6 +1487,9 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 		}
 	}
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CLIP_DISTANCE0);
 }
 
 void RenderBloom(App* app)
@@ -1551,6 +1554,58 @@ void RenderWater(App* app)
 
 	app->water.fboRefraction.unbind();
 #pragma endregion
+
+	Program& waterProgram = app->programs[app->water.waterProgramIdx];
+	glUseProgram(waterProgram.handle);
+
+	GLuint projectionMatLoc = glGetUniformLocation(waterProgram.handle, "projectionMatrix");
+	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, &app->projection[0][0]);
+	// !!
+	GLuint worldViewMatLoc = glGetUniformLocation(waterProgram.handle, "worldViewMatrix");
+	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, &app->scene.camera.transform.getTransformationMatrix()[0][0]);
+
+
+	GLuint viewportSizeLoc = glGetUniformLocation(waterProgram.handle, "viewportSize");
+	glUniform2iv(viewportSizeLoc, 1, &app->displaySize[0]);
+
+	// !!
+	GLuint modelViewMatrixLoc = glGetUniformLocation(waterProgram.handle, "modelViewMatrix");
+	glUniformMatrix4fv(modelViewMatrixLoc, 1, GL_FALSE, &app->water.waterObj.transform.getTransformationMatrix()[0][0]);
+
+	GLuint viewMatrixInvLoc = glGetUniformLocation(waterProgram.handle, "viewMatrixInv");
+	glUniformMatrix4fv(viewMatrixInvLoc, 1, GL_FALSE, &glm::inverse(app->scene.camera.transform.getTransformationMatrix())[0][0]);
+
+	GLuint projMatrixInvLoc = glGetUniformLocation(waterProgram.handle, "projectionMatrixInv");
+	glUniformMatrix4fv(projMatrixInvLoc, 1, GL_FALSE, &glm::inverse(app->projection)[0][0]);
+
+
+	GLuint reflectionMapLoc = glGetUniformLocation(waterProgram.handle, "reflectionMap");
+	glUniform1i(reflectionMapLoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, app->water.fboReflection.handle);
+
+	GLuint refractionMapLoc = glGetUniformLocation(waterProgram.handle, "refractionMap");
+	glUniform1i(refractionMapLoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, app->water.fboRefraction.handle);
+
+	GLuint reflectionDepthLoc = glGetUniformLocation(waterProgram.handle, "reflectionDepth");
+	glUniform1i(reflectionDepthLoc, 0);
+	glActiveTexture(GL_TEXTURE_DEPTH);
+	glBindTexture(GL_TEXTURE_2D, app->water.fboReflection.handle);
+
+	GLuint refractionDepthLoc = glGetUniformLocation(waterProgram.handle, "refractionDepth");
+	glUniform1i(refractionDepthLoc, 0);
+	glActiveTexture(GL_TEXTURE_DEPTH);
+	glBindTexture(GL_TEXTURE_2D, app->water.fboRefraction.handle);
+
+	Model& model = app->models[app->water.waterObj.modelID];
+	Mesh& mesh = app->meshes[model.meshIdx];
+	GLuint vao = FindVAO(mesh, 0, waterProgram);
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+	glUseProgram(0);
 }
 
 void RenderPostprocessing(App* app)
