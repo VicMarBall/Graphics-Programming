@@ -1457,7 +1457,7 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->uniformsBuffer.handle, app->globalUniformHead, app->globalUniformSize);
 
-	GLint textureLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "uTexture");
+	//GLint textureLoc = glGetUniformLocation(app->water.forwardClipProgramIdx, "uTexture");
 
 	for (const GameObject& gameObject : app->scene.gameObjects)
 	{
@@ -1481,9 +1481,9 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 			u32 submeshMaterialIdx = model.materialIdx[i];
 			Material& submeshMaterial = app->materials[submeshMaterialIdx];
 	
-			glUniform1i(textureLoc, 0);
+			//glUniform1i(textureLoc, 0);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, colorChannel);
+			glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
 	
 			Submesh& submesh = mesh.submeshes[i];
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);

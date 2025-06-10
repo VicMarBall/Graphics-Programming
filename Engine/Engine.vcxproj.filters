@@ -163,5 +163,8 @@
     <None Include="WorkingDir\forward_mesh.glsl">
       <Filter>Shaders\Forward</Filter>
     </None>
+    <None Include="WorkingDir\forward_clipping.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -35,10 +35,10 @@ void main()
 	vPosition = vec3(worldViewMatirx * vec4(aPosition, 1.0));
 	vNormal = normalize(vec3(worldViewMatirx * vec4(aNormal, 0.0)));
 
-    vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
+    //vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
 
 	gl_Position = projectionMatrix * vec4(aPosition, 1.0);
-    gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
+    //gl_ClipDistance[0] = dot(vec4(aPosition.zyz, 0.0), clippingPlane + clipDistanceDisplacement);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
