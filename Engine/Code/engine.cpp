@@ -1586,18 +1586,18 @@ void RenderWater(App* app)
 	glBindTexture(GL_TEXTURE_2D, app->water.fboReflection.handle);
 
 	GLuint refractionMapLoc = glGetUniformLocation(waterProgram.handle, "refractionMap");
-	glUniform1i(refractionMapLoc, 0);
-	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(refractionMapLoc, 1);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboRefraction.handle);
 
 	GLuint reflectionDepthLoc = glGetUniformLocation(waterProgram.handle, "reflectionDepth");
-	glUniform1i(reflectionDepthLoc, 0);
-	glActiveTexture(GL_TEXTURE_DEPTH);
+	glUniform1i(reflectionDepthLoc, 2);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboReflection.handle);
 
 	GLuint refractionDepthLoc = glGetUniformLocation(waterProgram.handle, "refractionDepth");
-	glUniform1i(refractionDepthLoc, 0);
-	glActiveTexture(GL_TEXTURE_DEPTH);
+	glUniform1i(refractionDepthLoc, 3);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, app->water.fboRefraction.handle);
 
 	Model& model = app->models[app->water.waterObj.modelID];
