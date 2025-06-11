@@ -283,6 +283,7 @@ void CreateScreenFramebuffers(App* app)
 
 	app->finalFramebuffer.bind();
 	app->finalFramebuffer.addColorAttachment(GL_COLOR_ATTACHMENT0, app->finalAttachmentHandle);
+	app->finalFramebuffer.addColorAttachment(GL_DEPTH_ATTACHMENT, app->depthAttachmentHandle);
 	app->finalFramebuffer.checkStatus();
 	app->finalFramebuffer.unbind();
 }
@@ -1303,7 +1304,7 @@ void RenderScreenQuad(App* app)
 
 	// clear color and depth
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUniform1ui(app->programCurrentFramebufferLocation, app->framebufferToDisplay);
 
