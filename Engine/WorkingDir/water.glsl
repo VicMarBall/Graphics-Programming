@@ -22,10 +22,7 @@ void main()
 
 #elif defined(FRAGMENT)
 
-in Data {
-    vec3 positionViewspace;
-    vec3 normalViewspace;
-} FSIn;
+
 
 uniform vec2 viewportSize;
 //uniform mat4 modelViewMatrix;
@@ -37,6 +34,11 @@ uniform sampler2D reflectionDepth;
 uniform sampler2D refractionDepth;
 //uniform sampler2D normalMap;
 //uniform sampler2D dudvMap;
+
+in Data {
+    vec3 positionViewspace;
+    vec3 normalViewspace;
+} FSIn;
 
 out vec4 outColor;
 
@@ -56,8 +58,6 @@ vec3 reconstructPixelPosition(float depth)
 
 void main()
 {
-    vec3 N = normalize(FSIn.normalViewspace);
-    vec3 V = normalize(-FSIn.positionViewspace);
     //vec3 Pw = vec3(viewMatrixInv * vec4(FSIn.positionViewspace, 1.0));
     vec2 texCoord = gl_FragCoord.xy / viewportSize;
 
@@ -81,13 +81,15 @@ void main()
     float tintFactor = clamp(distortedWaterDepth / turbidityDistance, 0.0, 1.0);
     vec3 waterColor = vec3(0.25, 0.4, 0.6);
     refractionColor = mix(refractionColor, waterColor, tintFactor);
-
+    
+    vec3 N = normalize(FSIn.normalViewspace);
+    vec3 V = normalize(-FSIn.positionViewspace);
+    
     // Fresnel
     vec3 F0 = vec3(0.1);
     vec3 F = fresnelSchlick(max(0.0, dot(V, N)), F0);
-    outColor.rgb = mix(reflectionColor, refractionColor, F);
+    outColor.rgb = mix(reflectionColor, refractionColor, 0.7);
     outColor.a = 1.0;
-    //outColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
 #endif
