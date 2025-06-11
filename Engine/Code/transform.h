@@ -42,7 +42,7 @@ public:
 		_scale = scale;
 	}
 
-	glm::mat4 getTransformationMatrix() 
+	glm::mat4 getTransformationMatrix() const
 	{
 		return glm::translate(glm::mat4(1.0f), _position) 
 			* glm::mat4_cast(glm::quat(glm::radians(_rotation))) 

@@ -25,6 +25,8 @@ layout(binding = 1, std140) uniform LocalParams
 	mat4 uWorldViewProjectionMatrix;
 };
 
+
+uniform mat4 worldViewProjection;
 uniform vec4 clippingPlane;
 uniform vec3 eyeWorldSpace;
 
@@ -41,7 +43,7 @@ void main()
 
     vec4 clipDistanceDisplacement = vec4(0.0, 0.0, 0.0, length(eyeWorldSpace) / 100.0);
 
-	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+	gl_Position = worldViewProjection * vec4(aPosition, 1.0);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 0.0), clippingPlane + clipDistanceDisplacement);
 }
 

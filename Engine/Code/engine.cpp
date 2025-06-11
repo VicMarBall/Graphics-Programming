@@ -1450,6 +1450,21 @@ void PassWater(App* app, Camera* camera, GLenum colorChannel, WaterScenePart wat
 #pragma region SetUniforms
 		glm::vec3 eyeWorldSpace = camera->transform.getTransformationMatrix() * glm::vec4(0.0, 0.0, 0.0, 1.0);
 
+		glm::mat4 projection;
+		glm::mat4 view;
+
+		if (app->displaySize.y > 0) {
+			float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
+			projection = glm::perspective(glm::radians(60.0f), aspectRatio, camera->zNear, camera->zFar);
+			glm::mat4 cameraMatrix = camera->transform.getTransformationMatrix();
+			view = glm::lookAt(camera->transform.getPosition(), camera->transform.getPosition() + glm::vec3(cameraMatrix[2]), glm::vec3(cameraMatrix[1]));
+		}
+
+		glm::mat4 worldViewProjection = projection * view * gameObject.transform.getTransformationMatrix();
+
+		GLint worldViewProjectionLoc = glGetUniformLocation(forwardClipProgram.handle, "worldViewProjection");
+		glUniformMatrix4fv(worldViewProjectionLoc, 1, GL_FALSE, &worldViewProjection[0][0]);
+
 		GLint eyeWorldSpaceLoc = glGetUniformLocation(forwardClipProgram.handle, "eyeWorldSpace");
 		glUniform3fv(eyeWorldSpaceLoc, 1, &eyeWorldSpace[0]);
 
